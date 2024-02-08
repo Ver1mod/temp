@@ -1,12 +1,11 @@
--- loadstring(game:HttpGet("https://raw.githubusercontent.com/Ver1mod/temp/main/test.lua", true))()
--- v10 Super (Minimalist)
+-- v10
 -- Global Variables
 local Player = game.Players.LocalPlayer
 local BulletReplication = game:GetService("ReplicatedStorage").BulletReplication.ReplicateClient
 local Use_Storage = game:GetService("ReplicatedStorage").Remotes.UseStorage
 local NPCs = game.Workspace.NPCs
 
-local function merge_tables(arg, value0)
+function merge_tables(arg, value0)
 	local value = arg
 	for i, v in value0 do
 		table.insert(value, v)
@@ -14,18 +13,31 @@ local function merge_tables(arg, value0)
 	return value
 end
 
+function find_character()
+	local test = false
+	if workspace:FindFirstChild(Player.Name) ~= nil then
+		if Player.Character.Humanoid.Health > 0 then
+			test = true
+		end
+	end
+	return test
+end
+
 -- The start
+local vu = game:GetService("VirtualUser")
+Player.Idled:connect(function()
+	vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+	wait(1)
+	vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+end)
+Instance.new("CFrameValue",Player).Name = "tpb"
 local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Ver1mod/NewGui/main/UI_Library.lua", true))()
 local example = library:CreateWindow({
 	text = "SCP: The Red Lake"
 })
 
-local example0 = library:CreateWindow({
-	text = "Items"
-})
-
 -- Inventory hacks
-example0:AddToggle("Inventory hacks", function(state)
+example:AddToggle("Inventory hacks", function(state)
 	_G.super_hands = (state and true or false)
 	if _G.super_hands == false then
 		wait(0.5)
@@ -61,27 +73,58 @@ example0:AddToggle("Inventory hacks", function(state)
 end)
 
 -- Auto potions
-example0:AddToggle("Strength Mixture", function(state)
-	_G.auto_strength = state
-	while _G.auto_strength do
-		pcall(function()
-			if Player.Character.Humanoid.Health ~= 0 then
-				local ohString1 = "WITHDRAW"
-				local ohString2 = "Strength Mixture"
-				if not Player.Backpack:FindFirstChild("Strength Mixture") and not Player.Character:FindFirstChild("Strength Mixture") then
-					Use_Storage:FireServer(ohString1, ohString2)
+example:AddToggle("Auto Cola", function(state)
+	_G.auto_cola = (state and true or false)
+	if _G.auto_cola == false then
+		wait(0.5)
+	else
+		while _G.auto_cola == true do
+			pcall(function()
+				if Player.Character.Humanoid.Health ~= 0 then
+					local ohString1 = "WITHDRAW"
+					local ohString2 = "Bloxy Cola"
+					if not Player.Backpack:FindFirstChild("Bloxy Cola") and not Player.Character:FindFirstChild("Bloxy Cola") then
+						Use_Storage:FireServer(ohString1, ohString2)
+					end
+
+					if Player.Backpack:FindFirstChild("Bloxy Cola") then
+						Player.Backpack:WaitForChild("Bloxy Cola").Parent = Player.Character
+					end
+
+					Player.Character:WaitForChild("Bloxy Cola").Use:FireServer(Vector3.new(0,0,0))
+					wait(20.5)
 				end
-				Player.Backpack:WaitForChild("Strength Mixture").Parent = Player.Character
-				Player.Character:WaitForChild("Strength Mixture").Use:FireServer(Vector3.new(0,0,0))
-				wait(15)
-			end
-		end)
-		task.wait()
+			end)
+			task.wait()
+		end
 	end
 end)
 
--- Auto bring items
-example0:AddButton("Teleport Device", function(state)
+example:AddToggle("Auto Strength", function(state)
+	_G.auto_strength = (state and true or false)
+	if _G.auto_strength == false then
+		wait(0.5)
+	else
+		while _G.auto_strength == true do
+			pcall(function()
+				if Player.Character.Humanoid.Health ~= 0 then
+					local ohString1 = "WITHDRAW"
+					local ohString2 = "Strength Mixture"
+					if not Player.Backpack:FindFirstChild("Strength Mixture") and not Player.Character:FindFirstChild("Strength Mixture") then
+						Use_Storage:FireServer(ohString1, ohString2)
+					end
+
+					Player.Backpack:WaitForChild("Strength Mixture").Parent = Player.Character
+					Player.Character:WaitForChild("Strength Mixture").Use:FireServer(Vector3.new(0,0,0))
+					wait(15)
+				end
+			end)
+			task.wait()
+		end
+	end
+end)
+
+example:AddButton("Teleport Device", function(state)
 	local ohString1 = "WITHDRAW"
 	local ohString2 = "Teleport Device"
 	Use_Storage:FireServer(ohString1, ohString2)
@@ -89,47 +132,16 @@ example0:AddButton("Teleport Device", function(state)
 	Player.Character:WaitForChild(ohString2).Use:FireServer(Vector3.new(0,0,0))
 end)
 
-example0:AddButton("Smoke Grenade", function(state)
+example:AddButton("Teleport Trap", function(state)
 	local ohString1 = "WITHDRAW"
-	local ohString2 = "Smoke Grenade"
+	local ohString2 = "Teleport Trap"
 	Use_Storage:FireServer(ohString1, ohString2)
+	Player.Backpack:WaitForChild(ohString2).Parent = Player.Character
+	Player.Character:WaitForChild(ohString2).Use:FireServer(Vector3.new(0,0,0))
 end)
 
-example0:AddButton("Scan Grenade", function(state)
-	local ohString1 = "WITHDRAW"
-	local ohString2 = "Scan Grenade"
-	Use_Storage:FireServer(ohString1, ohString2)
-end)
-
-example0:AddButton("Aura Grenade", function(state)
-	local ohString1 = "WITHDRAW"
-	local ohString2 = "Aura Grenade"
-	Use_Storage:FireServer(ohString1, ohString2)
-end)
-
--- Aimbot settings
-example:AddBox("RPM", function(object, focus)
-	if focus then
-		_G.RPM = 0
-		pcall(function()
-			_G.RPM = 1/tonumber(object.Text)*60
-		end)
-	end
-end)
-
-example:AddBox("Range", function(object, focus)
-	if focus then
-		_G.Range = 3
-		pcall(function()
-			_G.Range = tonumber(object.Text)
-		end)
-	end
-end)
-
--- Backpack hack
 example:AddToggle("Enable backpack bag", function(state)
-	_G.backpack_hack = state
-	while _G.backpack_hack do
+	while state == true do
 		pcall(function()
 			fireproximityprompt(Player.Character.BackpackBag.Handle.Template)
 		end)
@@ -137,11 +149,11 @@ example:AddToggle("Enable backpack bag", function(state)
 	end
 end)
 
--- Aimbot modules
+-- Aimbot modes
 local time_test = false
 local animation
 local animloader
-local function shot_animation(tool)
+function shot_animation(tool)
 	if time_test == false then
 		time_test = true
 
@@ -152,14 +164,15 @@ local function shot_animation(tool)
 			end
 
 			animloader:Play()
-			wait(1/(tool:GetAttribute("RPM")/40))
+			wait(1/(tool:GetAttribute("RPM")/45))
 		end)
 
 		time_test = false
 	end
 end
 
-local function my_gun()
+
+function my_gun()
 	if not Player:FindFirstChild("MyGun") then
 		if Player.Character:FindFirstChildOfClass("Tool") then
 			Instance.new("StringValue", Player).Name = "MyGun"
@@ -171,16 +184,8 @@ local function my_gun()
 	end
 end
 
-local function auto_equip()
-	for _, v in Player.Backpack:GetChildren() do
-		local Ignored = v.Name == "Bloxy Cola" or v.Name == "Focus Potion"
-		if v:GetAttribute("Ammo") ~= nil or Ignored then
-			v.Parent = Player.Character
-		end
-	end
-end
 
-local function shot(weapon, enemy)
+function shot(weapon, enemy)
 	if weapon:GetAttribute("Ammo") ~= nil then
 		if Player:DistanceFromCharacter(enemy.Position) < weapon:GetAttribute("Range")*2 then
 			BulletReplication:Fire("MUZZLE", weapon.Handle.Barrel)
@@ -197,60 +202,75 @@ local function shot(weapon, enemy)
 	end
 end
 
--- Aimbot modes
+function auto_equip()
+	for _, v in Player.Backpack:GetChildren() do
+		local Ignored = v.Name == "Bloxy Cola" or v.Name == "Focus Potion"
+		if v:GetAttribute("Ammo") ~= nil or Ignored then
+			v.Parent = Player.Character
+		end
+	end
+end
 example:AddToggle("Auto Farm Mobs(Ex)", function(state)
-	_G.autofarm = state
-    my_gun()
-	while _G.autofarm do
-		pcall(function()
-			auto_equip()
-			local enemies = merge_tables(
-				NPCs.Monsters:GetChildren(), 
-				NPCs.Tango:GetChildren()
-			)
-			for _, enemy in enemies do
-				local v = enemy.Head
-				auto_equip()
-				if v.Parent.Parent.Name ~= "Deceased" and v.Parent.Humanoid.Health > 0 then
-					for _, tool in Player.Character:GetChildren() do
-						shot(tool, v)
+	_G.autofarm = (state and true or false)
+	if _G.autofarm == false then
+		wait(0.5)
+	else
+		while _G.autofarm do
+			wait()
+			pcall(function()
+				my_gun()
+				local enemies = merge_tables(
+					NPCs.Monsters:GetChildren(), 
+					NPCs.Tango:GetChildren()
+				)
+				for _, enemy in enemies do
+					local v = enemy.Head
+					auto_equip()
+					if v ~= nil and v.Parent.Parent.Name ~= "Deceased" and v.Parent.Humanoid.Health > 0 then
+						for _, tool in Player.Character:GetChildren() do
+							shot(tool, v)
+						end
+						task.wait()
 					end
-					task.wait(_G.RPM)
 				end
-			end
-		end)
-		task.wait()
+			end)
+		end
 	end
 end)
 
 example:AddToggle("Auto Farm Mobs", function(state)
-	_G.autofarm = state
-	while _G.autofarm do
-		wait()
-		pcall(function()
-			local enemy
-			local distance = 9216
-
-			local enemies = merge_tables(
-				NPCs.Monsters:GetChildren(), 
-				NPCs.Tango:GetChildren()
-			)
-
-			for i,v in enemies do
-				if Player:DistanceFromCharacter(v.Head.Position) < distance then
-					enemy = v
-					distance = Player:DistanceFromCharacter(v.Head.Position)
+	_G.autofarm = (state and true or false)
+	if _G.autofarm == false then
+		wait(0.5)
+	else
+		while _G.autofarm do
+			wait()
+			pcall(function()
+				my_gun()
+				local enemy
+				local distance = 9216
+				
+				local enemies = merge_tables(
+					NPCs.Monsters:GetChildren(), 
+					NPCs.Tango:GetChildren()
+				)
+				
+				for i,v in enemies do
+					if Player:DistanceFromCharacter(v.Head.Position) < distance then
+						enemy = v
+						distance = Player:DistanceFromCharacter(v.Head.Position)
+					end
 				end
-			end
-
-			local v = enemy.Head
-			repeat task.wait()
-				auto_equip()
-				for _, tool in Player.Character:GetChildren() do
-					shot(tool, v)
-				end
-			until v.Parent.Humanoid.Health == 0 or _G.autofarm == false
-		end)
+				
+				local v = enemy.Head
+				repeat task.wait()
+					auto_equip()
+					for _, tool in Player.Character:GetChildren() do
+						shot(tool, v)
+					end
+				until v.Parent.Humanoid.Health == 0 or _G.autofarm == false
+			end)
+		end
 	end
 end)
 
