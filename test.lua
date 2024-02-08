@@ -242,3 +242,62 @@ example:AddToggle("Auto Farm Mobs", function(state)
 		end)
 	end
 end)
+
+-- Auto mod detection
+example:AddToggle("Auto Disconnect", function(state)
+	_G.auto_disconnect = (state and true or false)
+
+	if _G.auto_disconnect == false then
+		wait(0.5)
+	else
+		while _G.auto_disconnect == true do
+			local names = ""
+			local list = {
+				"Homboor", 
+				"Rynhex", 
+				"yuji071", 
+				"xXDrqgon", 
+				"deaconwtx", 
+				"Red_intern", 
+				"TrueShadowSpear", 
+				"GoszuGamer", 
+				"luckyluke1281mia",
+				"AntePavelicPoglavnik",
+				"happysully07",
+				"perciless",
+				"Steven_XP23",
+				"Chaosys",
+				"hack_tested"
+			}
+
+			local mod = 0
+			local iter = 0
+			for i, player in pairs(game:GetService("Players"):GetChildren()) do --Get the table of players
+				local name = game:GetService("Players")[tostring(player)].Name --Nick of the loop's player
+				for i, n in list do
+					iter += 1
+					if name == n then
+						if names ~= "" then
+							names = names .. ", " .. name
+						else
+							names = name
+						end
+						print(n)
+						mod += 1
+					end
+				end
+			end
+			print("Number of iterations:", iter)
+			if mod == 0 then
+				game:GetService("CoreGui").UILibrary:FindFirstChildOfClass("Frame").Name = "0 mods"
+				game:GetService("CoreGui").UILibrary:FindFirstChildOfClass("Frame").Window.Text = "0 mods"
+				-- print("The server hasn't any moderators")
+			else
+				game:GetService("CoreGui").UILibrary:FindFirstChildOfClass("Frame").Name = "DISCONNECT RIGHT NOW!!!"
+				game:GetService("CoreGui").UILibrary:FindFirstChildOfClass("Frame").Window.Text = "DISCONNECT RIGHT NOW!!!"
+				print("The server has", mod, "moderators")
+			end
+			wait(30)
+		end
+	end
+end)
