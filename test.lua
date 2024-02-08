@@ -1,3 +1,4 @@
+-- loadstring(game:HttpGet("https://raw.githubusercontent.com/Ver1mod/temp/main/test.lua", true))()
 -- v10 Super (Minimalist)
 -- Global Variables
 local Player = game.Players.LocalPlayer
@@ -170,6 +171,15 @@ local function my_gun()
 	end
 end
 
+local function auto_equip()
+	for _, v in Player.Backpack:GetChildren() do
+		local Ignored = v.Name == "Bloxy Cola" or v.Name == "Focus Potion"
+		if v:GetAttribute("Ammo") ~= nil or Ignored then
+			v.Parent = Player.Character
+		end
+	end
+end
+
 local function shot(weapon, enemy)
 	if weapon:GetAttribute("Ammo") ~= nil then
 		if Player:DistanceFromCharacter(enemy.Position) < weapon:GetAttribute("Range")*2 then
@@ -190,6 +200,7 @@ end
 -- Aimbot modes
 example:AddToggle("Auto Farm Mobs(Ex)", function(state)
 	_G.autofarm = state
+    my_gun()
 	while _G.autofarm do
 		pcall(function()
 			auto_equip()
