@@ -5,7 +5,7 @@ local BulletReplication = game:GetService("ReplicatedStorage").BulletReplication
 local Use_Storage = game:GetService("ReplicatedStorage").Remotes.UseStorage
 local NPCs = game.Workspace.NPCs
 
-function merge_tables(arg, value0)
+local function merge_tables(arg, value0)
 	local value = arg
 	for i, v in value0 do
 		table.insert(value, v)
@@ -22,6 +22,42 @@ local example = library:CreateWindow({
 local example0 = library:CreateWindow({
 	text = "Items"
 })
+
+-- Inventory hacks
+example0:AddToggle("Inventory hacks", function(state)
+	_G.super_hands = (state and true or false)
+	if _G.super_hands == false then
+		wait(0.5)
+	else
+		coroutine.wrap(function()
+			local character = Player.Character
+			while character.Humanoid.Health ~= 0 and _G.super_hands == true do
+				for _, v in Player.Backpack:GetChildren() do
+					-- Variables
+					local Ignored = (v.Name == "Bloxy Cola" or v.Name == "Focus Potion")
+					local Ignored_guns = v.Name ~= "U10" and v.Name ~= "UZI"
+
+					-- Actions
+					if v.Name ~= Player.MyGun.Value and v.Grip.Y < 15 and Ignored_guns and (v:GetAttribute("Uses") == nil or Ignored) then
+						v.Grip = CFrame.new(v.Grip.X, v.Grip.Y+30, v.Grip.Z) * v.Grip.Rotation
+					elseif not Ignored_guns and v.Grip.Z < 15 and (v:GetAttribute("Uses") == nil or Ignored) then
+						v.Grip = CFrame.new(v.Grip.X, v.Grip.Y, v.Grip.Z+30) * v.Grip.Rotation
+					elseif v.Name == Player.MyGun.Value then
+						if v.Grip.Y > 15 and v:GetAttribute("Ammo") ~= nil or Ignored then
+							v.Grip = CFrame.new(v.Grip.X, v.Grip.Y-30, v.Grip.Z) * v.Grip.Rotation
+						elseif v.Grip.Z > 15 and v:GetAttribute("Ammo") ~= nil or Ignored then
+							v.Grip = CFrame.new(v.Grip.X, v.Grip.Y, v.Grip.Z-30) * v.Grip.Rotation
+						end
+					end
+					if v:GetAttribute("Ammo") ~= nil or Ignored then
+						v.Parent = character
+					end
+				end
+				wait()
+			end
+		end)()
+	end
+end)
 
 -- Auto potions
 example0:AddToggle("Strength Mixture", function(state)
@@ -101,21 +137,52 @@ example:AddToggle("Enable backpack bag", function(state)
 end)
 
 -- Aimbot modules
-function shot(weapon, enemy)
-	if weapon:GetAttribute("Ammo") ~= nil then
-		if Player:DistanceFromCharacter(enemy.Position) < weapon:GetAttribute("Range")*_G.Range then
-			weapon.Main:FireServer("MUZZLE", weapon.Handle.Barrel)
-			weapon.Main:FireServer("DAMAGE", {[1]=enemy,[2] = enemy.Position,[3]=100})
-			weapon.Main:FireServer("AMMO")
+local time_test = false
+local animation
+local animloader
+local function shot_animation(tool)
+	if time_test == false then
+		time_test = true
+
+		pcall(function()
+			if animloader == nil or animation.Parent ~= tool then
+				animation = tool.ShootAnim
+				animloader = tool.Parent.Humanoid:LoadAnimation(animation)
+			end
+
+			animloader:Play()
+			wait(1/(tool:GetAttribute("RPM")/40))
+		end)
+
+		time_test = false
+	end
+end
+
+local function my_gun()
+	if not Player:FindFirstChild("MyGun") then
+		if Player.Character:FindFirstChildOfClass("Tool") then
+			Instance.new("StringValue", Player).Name = "MyGun"
+			wait()
+			if Player.Character:FindFirstChildOfClass("Tool").Name:GetAttribute("Ammo") ~= nil then
+				Player:FindFirstChild("MyGun").Value = Player.Character:FindFirstChildOfClass("Tool").Name
+			end
 		end
 	end
 end
 
-function auto_equip()
-	for _, v in Player.Backpack:GetChildren() do
-		local Ignored = v.Name == "Bloxy Cola" or v.Name == "Focus Potion"
-		if v:GetAttribute("Ammo") ~= nil or Ignored then
-			v.Parent = Player.Character
+local function shot(weapon, enemy)
+	if weapon:GetAttribute("Ammo") ~= nil then
+		if Player:DistanceFromCharacter(enemy.Position) < weapon:GetAttribute("Range")*2 then
+			BulletReplication:Fire("MUZZLE", weapon.Handle.Barrel)
+			BulletReplication:Fire("HIT", weapon.Handle.Barrel, {[1]=enemy.Position,[3] = false,[4]="Plastic"})
+			weapon.Main:FireServer("MUZZLE", weapon.Handle.Barrel)
+			weapon.Main:FireServer("DAMAGE", {[1]=enemy,[2] = enemy.Position,[3]=100})
+			weapon.Main:FireServer("AMMO")
+			if weapon.Name == Player.MyGun.Value then
+				coroutine.wrap(function()
+					shot_animation(weapon)
+				end)()
+			end
 		end
 	end
 end
@@ -173,87 +240,5 @@ example:AddToggle("Auto Farm Mobs", function(state)
 				end
 			until v.Parent.Humanoid.Health == 0 or _G.autofarm == false
 		end)
-	end
-end)
-
-function shot0(weapon, enemy)
-	if weapon:GetAttribute("Ammo") ~= nil then
-		if Player:DistanceFromCharacter(enemy.Position) < weapon:GetAttribute("Range")*_G.Range then
-			weapon.Main:FireServer("MUZZLE", weapon.Handle.Barrel)
-			for i = 1, 4 do
-				weapon.Main:FireServer("DAMAGE", {[1]=enemy,[2] = enemy.Position,[3]=100})
-			end
-			weapon.Main:FireServer("AMMO")
-		end
-	end
-end
-
-example:AddToggle("Smart Fire", function(state)
-	_G.autofarm = state
-	while _G.autofarm do
-		wait()
-		pcall(function()
-			local enemy
-			local distance = 9216
-
-			local enemies = merge_tables(
-				NPCs.Monsters:GetChildren(), 
-				NPCs.Tango:GetChildren()
-			)
-
-			for i,v in enemies do
-				if Player:DistanceFromCharacter(v.Head.Position) < distance then
-					enemy = v
-					distance = Player:DistanceFromCharacter(v.Head.Position)
-				end
-			end
-
-			local v = enemy.Head
-			repeat task.wait()
-				auto_equip()
-				for _, tool in Player.Character:GetChildren() do
-					shot0(tool, v)
-				end
-			until v.Parent.Humanoid.Health == 0 or _G.autofarm == false
-		end)
-	end
-end)
-
--- Aimbot settings
-example:AddBox("Shots", function(object, focus)
-	if focus then
-		_G.Shots = 0
-		pcall(function()
-			_G.Shots = tonumber(object.Text)
-		end)
-	end
-end)
-
-example:AddButton("Shoot", function()
-	_G.autofarm = not _G.autofarm
-	local enemy
-	local distance = 9216
-
-	local enemies = merge_tables(
-		NPCs.Monsters:GetChildren(), 
-		NPCs.Tango:GetChildren()
-	)
-
-	for i,v in enemies do
-		if Player:DistanceFromCharacter(v.Head.Position) < distance then
-			enemy = v
-			distance = Player:DistanceFromCharacter(v.Head.Position)
-		end
-	end
-
-	local v = enemy.Head
-	for i = 1, _G.Shots do
-		auto_equip()
-		for _, tool in Player.Character:GetChildren() do
-			shot0(tool, v)
-		end
-		if v.Parent.Humanoid.Health == 0 or _G.autofarm == false then
-			break
-		end
 	end
 end)
