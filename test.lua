@@ -1,4 +1,4 @@
--- loadstring(game:HttpGet("https://github.com/Ver1mod/temp/blob/a54f392a15ebbc0ff9552e243c8f2cb5318a3a20/test.lua", true))()
+-- loadstring(game:HttpGet("https://raw.githubusercontent.com/Ver1mod/temp/main/test.lua", true))()
 -- v10 Super (Minimalist)
 -- Global Variables
 print("Active")
@@ -116,7 +116,7 @@ example:AddToggle("Add gun animation", function(state)
 		if _G.is_shoot_animation == true then
 			local animloader = Humanoid:LoadAnimation(_G.my_gun.ShootAnim)
 			animloader:Play()
-			task.wait(1/(_G.my_gun:GetAttribute("RPM")/40))
+			task.wait(1/(_G.my_gun:GetAttribute("RPM")/60))
 		end
 	end
 end)
@@ -134,15 +134,8 @@ end)
 -- end
 
 example:AddButton("Set main gun", function(state)
-	if Player.Character:FindFirstChildOfClass("Tool"):GetAttribute("Ammo") ~= nil then
-		_G.my_gun = Player.Character:FindFirstChildOfClass("Tool")
-		--Instance.new("StringValue", _G.my_gun.Parent).Name = "MyGun"
-		for _, v in Player.Backpack:GetChildren() do
-			if v.ClassName == "Tool" and v:GetAttribute("Ammo") ~= nil then
-				v.Grip = CFrame.new(v.Grip.X, v.Grip.Y+30, v.Grip.Z) * v.Grip.Rotation
-			end
-		end
-	end
+	_G.my_gun = Player.Character:FindFirstChildOfClass("Tool")
+	Instance.new("StringValue", _G.my_gun.Parent).Name = "MyGun"
 end)
 
 local function auto_equip()
