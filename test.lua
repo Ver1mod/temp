@@ -1,5 +1,7 @@
 -- v10 Super (Minimalist)
 -- Global Variables
+
+-- loadstring(game:HttpGet("https://raw.githubusercontent.com/Ver1mod/temp/8efbfe60dc7c0fb56276cce2e87485a79440f03e/test.lua", true))()
 coroutine.wrap(function()
 
 	local Player = game.Players.LocalPlayer
@@ -89,7 +91,15 @@ coroutine.wrap(function()
 			end)
 		end
 	end)
-
+	
+	example:AddBox("Animation Speed", function(object, focus)
+		if focus then
+			_G.Animation_speed = 45
+			pcall(function()
+				_G.Animation_speed = tonumber(object.Text)
+			end)
+		end
+	end)
 	-- Backpack hack
 	example:AddToggle("Enable backpack bag", function(state)
 		_G.backpack_hack = state
@@ -108,6 +118,7 @@ coroutine.wrap(function()
 
 	_G.is_shoot_animation = false
 	example:AddToggle("Add gun animation", function(state)
+		_G.is_shoot_animation = false
 		local is_animating = state
 		while task.wait() and is_animating do
 			local Character = workspace:WaitForChild(Player.Name)
@@ -115,7 +126,7 @@ coroutine.wrap(function()
 			if _G.is_shoot_animation == true then
 				local animloader = Humanoid:LoadAnimation(_G.my_gun.ShootAnim)
 				animloader:Play()
-				task.wait(1/(_G.my_gun:GetAttribute("RPM")/60))
+				task.wait(1/(_G.my_gun:GetAttribute("RPM")/_G.Animation_speed))
 			end
 		end
 	end)
