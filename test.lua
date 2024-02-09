@@ -1,6 +1,6 @@
--- loadstring(game:HttpGet("https://raw.githubusercontent.com/Ver1mod/temp/main/test.lua", true))()
--- v10 Super (Minimalist)
--- Global Variables
+
+print("Active")
+warn("Active")
 local Player = game.Players.LocalPlayer
 local BulletReplication = game:GetService("ReplicatedStorage").BulletReplication.ReplicateClient
 local Use_Storage = game:GetService("ReplicatedStorage").Remotes.UseStorage
@@ -19,46 +19,9 @@ local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Ver1m
 local example = library:CreateWindow({
 	text = "SCP: The Red Lake"
 })
-
 local example0 = library:CreateWindow({
 	text = "Items"
 })
-
--- Inventory hacks
-example0:AddToggle("Inventory hacks", function(state)
-	_G.super_hands = (state and true or false)
-	if _G.super_hands == false then
-		wait(0.5)
-	else
-		coroutine.wrap(function()
-			local character = Player.Character
-			while character.Humanoid.Health ~= 0 and _G.super_hands == true do
-				for _, v in Player.Backpack:GetChildren() do
-					-- Variables
-					local Ignored = (v.Name == "Bloxy Cola" or v.Name == "Focus Potion")
-					local Ignored_guns = v.Name ~= "U10" and v.Name ~= "UZI"
-
-					-- Actions
-					if v.Name ~= Player.MyGun.Value and v.Grip.Y < 15 and Ignored_guns and (v:GetAttribute("Uses") == nil or Ignored) then
-						v.Grip = CFrame.new(v.Grip.X, v.Grip.Y+30, v.Grip.Z) * v.Grip.Rotation
-					elseif not Ignored_guns and v.Grip.Z < 15 and (v:GetAttribute("Uses") == nil or Ignored) then
-						v.Grip = CFrame.new(v.Grip.X, v.Grip.Y, v.Grip.Z+30) * v.Grip.Rotation
-					elseif v.Name == Player.MyGun.Value then
-						if v.Grip.Y > 15 and v:GetAttribute("Ammo") ~= nil or Ignored then
-							v.Grip = CFrame.new(v.Grip.X, v.Grip.Y-30, v.Grip.Z) * v.Grip.Rotation
-						elseif v.Grip.Z > 15 and v:GetAttribute("Ammo") ~= nil or Ignored then
-							v.Grip = CFrame.new(v.Grip.X, v.Grip.Y, v.Grip.Z-30) * v.Grip.Rotation
-						end
-					end
-					if v:GetAttribute("Ammo") ~= nil or Ignored then
-						v.Parent = character
-					end
-				end
-				wait()
-			end
-		end)()
-	end
-end)
 
 -- Auto potions
 example0:AddToggle("Strength Mixture", function(state)
@@ -141,25 +104,6 @@ end)
 local time_test = false
 local animation
 local animloader
-
-local function shot_animation(tool)
-	-- if time_test == false then
-	-- 	time_test = true
-
-	-- 	pcall(function()
-	-- 		if animloader == nil or animation.Parent ~= tool then
-	-- 			animation = tool.ShootAnim
-	-- 			animloader = tool.Parent.Humanoid:LoadAnimation(animation)
-	-- 		end
-
-	-- 		animloader:Play()
-	-- 		wait(1/(tool:GetAttribute("RPM")/40))
-	-- 	end)
-
-	-- 	time_test = false
-	-- end
-	
-end
 
 _G.is_shoot_animation = false
 example:AddToggle("Add gun animation", function(state)
