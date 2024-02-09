@@ -1,7 +1,7 @@
 -- v10 Super (Minimalist)
 -- Global Variables
 
--- loadstring(game:HttpGet("https://raw.githubusercontent.com/Ver1mod/temp/ea26fa9253706a16718b44344a359a44f67ce548/test.lua", true))()
+-- loadstring(game:HttpGet("https://raw.githubusercontent.com/Ver1mod/temp/7c1e276c2e2fac02c0f0ecf65823631141b3316c/test.lua", true))()
 coroutine.wrap(function()
 
 	local Player = game.Players.LocalPlayer
@@ -112,20 +112,6 @@ coroutine.wrap(function()
 	end)
 
 	-- Aimbot modules
-	_G.is_shoot_animation = false
-	example:AddToggle("Add gun animation", function(state)
-		_G.is_animating = state
-		while _G.is_animating  and task.wait() do
-			local Character = workspace:WaitForChild(Player.Name)
-			local Humanoid = Character:WaitForChild("Humanoid")
-			if _G.is_shoot_animation == true then
-				local animloader = Humanoid:LoadAnimation(_G.my_gun.ShootAnim)
-				animloader:Play()
-				task.wait(1/(_G.my_gun:GetAttribute("RPM")/_G.Animation_speed))
-			end
-		end
-	end)
-
 	example:AddButton("Set main gun", function(state)
 		if Player.Character:FindFirstChildOfClass("Tool"):GetAttribute("Ammo") ~= nil then
 			_G.my_gun = Player.Character:FindFirstChildOfClass("Tool")
@@ -146,13 +132,40 @@ coroutine.wrap(function()
 			end
 		end
 	end
+	
+	local time_test = false
+	local function shot_animation(tool)
+		if time_test == false then
+			time_test = true
 
+			pcall(function()
+				--if animloader == nil or animation.Parent ~= tool then
+				if workspace:FindFirstChild(Player.Name) and workspace:FindFirstChild(Player.Name):FindFirstChild("Humanoid") then
+						local Character = workspace:FindFirstChild(Player.Name)
+						local Humanoid = Character:FindFirstChild("Humanoid")
+
+						local animloader = Humanoid:LoadAnimation(_G.my_gun.ShootAnim)
+						animloader:Play()
+						task.wait(1/(_G.my_gun:GetAttribute("RPM")/_G.Animation_speed))
+					end
+					--animation = tool.ShootAnim
+					--animloader = tool.Parent.Humanoid:LoadAnimation(animation)
+					--animloader:Play()
+					--wait(1/(tool:GetAttribute("RPM")/_G.Animation_speed))
+				--end
+			end)
+
+			time_test = false
+		end
+	end
+	
 	local function shot(weapon, enemy)
 		if weapon:GetAttribute("Ammo") ~= nil then
 			if Player:DistanceFromCharacter(enemy.Position) < weapon:GetAttribute("Range")*_G.Range then
 				weapon.Main:FireServer("MUZZLE", weapon.Handle.Barrel)
 				weapon.Main:FireServer("DAMAGE", {[1]=enemy,[2] = enemy.Position,[3]=100})
 				weapon.Main:FireServer("AMMO")
+				coroutine.wrap(shot_animation)()
 			end
 		end
 	end
@@ -160,7 +173,6 @@ coroutine.wrap(function()
 	-- Aimbot modes
 	example:AddToggle("Auto Farm Mobs(Ex)", function(state)
 		_G.autofarm = state
-		_G.is_shoot_animation = state
 		while _G.autofarm do
 			pcall(function()
 				auto_equip()
@@ -185,7 +197,6 @@ coroutine.wrap(function()
 
 	example:AddToggle("Auto Farm Mobs", function(state)
 		_G.autofarm = state
-		_G.is_shoot_animation = state
 		while _G.autofarm do
 			wait()
 			pcall(function()
