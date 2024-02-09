@@ -1,7 +1,7 @@
 -- v10 Super (Minimalist)
 -- Global Variables
 
--- loadstring(game:HttpGet("https://raw.githubusercontent.com/Ver1mod/temp/8efbfe60dc7c0fb56276cce2e87485a79440f03e/test.lua", true))()
+-- loadstring(game:HttpGet("https://raw.githubusercontent.com/Ver1mod/temp/ea26fa9253706a16718b44344a359a44f67ce548/test.lua", true))()
 coroutine.wrap(function()
 
 	local Player = game.Players.LocalPlayer
@@ -107,20 +107,15 @@ coroutine.wrap(function()
 			pcall(function()
 				fireproximityprompt(Player.Character.BackpackBag.Handle.Template)
 			end)
-			wait(1)
+			task.wait(1)
 		end
 	end)
 
 	-- Aimbot modules
-	local time_test = false
-	local animation
-	local animloader
-
 	_G.is_shoot_animation = false
 	example:AddToggle("Add gun animation", function(state)
-		_G.is_shoot_animation = false
-		local is_animating = state
-		while task.wait() and is_animating do
+		_G.is_animating = state
+		while _G.is_animating  and task.wait() do
 			local Character = workspace:WaitForChild(Player.Name)
 			local Humanoid = Character:WaitForChild("Humanoid")
 			if _G.is_shoot_animation == true then
