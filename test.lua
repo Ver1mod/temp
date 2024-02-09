@@ -141,35 +141,56 @@ end)
 local time_test = false
 local animation
 local animloader
+
 local function shot_animation(tool)
-	if time_test == false then
-		time_test = true
+	-- if time_test == false then
+	-- 	time_test = true
 
-		pcall(function()
-			if animloader == nil or animation.Parent ~= tool then
-				animation = tool.ShootAnim
-				animloader = tool.Parent.Humanoid:LoadAnimation(animation)
-			end
+	-- 	pcall(function()
+	-- 		if animloader == nil or animation.Parent ~= tool then
+	-- 			animation = tool.ShootAnim
+	-- 			animloader = tool.Parent.Humanoid:LoadAnimation(animation)
+	-- 		end
 
-			animloader:Play()
-			wait(1/(tool:GetAttribute("RPM")/40))
-		end)
+	-- 		animloader:Play()
+	-- 		wait(1/(tool:GetAttribute("RPM")/40))
+	-- 	end)
 
-		time_test = false
-	end
+	-- 	time_test = false
+	-- end
+	
 end
 
-local function my_gun()
-	if not Player:FindFirstChild("MyGun") then
-		if Player.Character:FindFirstChildOfClass("Tool") then
-			Instance.new("StringValue", Player).Name = "MyGun"
-			wait()
-			if Player.Character:FindFirstChildOfClass("Tool").Name:GetAttribute("Ammo") ~= nil then
-				Player:FindFirstChild("MyGun").Value = Player.Character:FindFirstChildOfClass("Tool").Name
-			end
+_G.is_shoot_animation = false
+example:AddToggle("Add gun animation", function(state)
+	local is_animating = state
+	while task.wait() and is_animating do
+		local Character = workspace:WaitForChild(Player.Name)
+		local Humanoid = Character:WaitForChild("Humanoid")
+		if _G.is_shoot_animation == true do
+			local animloader = Humanoid:LoadAnimation(_G.my_gun.ShootAnim)
+			animloader:Play()
+			task.wait(1/(_G.my_gun:GetAttribute("RPM")/40))
 		end
 	end
-end
+end)
+
+-- local function my_gun()
+-- 	if not Player:FindFirstChild("MyGun") then
+-- 		if Player.Character:FindFirstChildOfClass("Tool") then
+-- 			Instance.new("StringValue", Player).Name = "MyGun"
+-- 			wait()
+-- 			if Player.Character:FindFirstChildOfClass("Tool").Name:GetAttribute("Ammo") ~= nil then
+-- 				Player:FindFirstChild("MyGun").Value = Player.Character:FindFirstChildOfClass("Tool").Name
+-- 			end
+-- 		end
+-- 	end
+-- end
+
+example:AddButton("Set main gun", function()
+	_G.my_gun = Player.Character:FindFirstChildOfClass("Tool")
+	Instance.new("StringValue", _G.my_gun.Parent).Name = "MyGun"
+end)
 
 local function auto_equip()
 	for _, v in Player.Backpack:GetChildren() do
@@ -182,17 +203,10 @@ end
 
 local function shot(weapon, enemy)
 	if weapon:GetAttribute("Ammo") ~= nil then
-		if Player:DistanceFromCharacter(enemy.Position) < weapon:GetAttribute("Range")*2 then
-			BulletReplication:Fire("MUZZLE", weapon.Handle.Barrel)
-			BulletReplication:Fire("HIT", weapon.Handle.Barrel, {[1]=enemy.Position,[3] = false,[4]="Plastic"})
+		if Player:DistanceFromCharacter(enemy.Position) < weapon:GetAttribute("Range")*_G.Range then
 			weapon.Main:FireServer("MUZZLE", weapon.Handle.Barrel)
 			weapon.Main:FireServer("DAMAGE", {[1]=enemy,[2] = enemy.Position,[3]=100})
 			weapon.Main:FireServer("AMMO")
-			if weapon.Name == Player.MyGun.Value then
-				coroutine.wrap(function()
-					shot_animation(weapon)
-				end)()
-			end
 		end
 	end
 end
@@ -200,7 +214,7 @@ end
 -- Aimbot modes
 example:AddToggle("Auto Farm Mobs(Ex)", function(state)
 	_G.autofarm = state
-    my_gun()
+	_G.is_shoot_animation = state
 	while _G.autofarm do
 		pcall(function()
 			auto_equip()
@@ -225,6 +239,7 @@ end)
 
 example:AddToggle("Auto Farm Mobs", function(state)
 	_G.autofarm = state
+	_G.is_shoot_animation = state
 	while _G.autofarm do
 		wait()
 		pcall(function()
