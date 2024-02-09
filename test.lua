@@ -1,4 +1,4 @@
--- loadstring(game:HttpGet("https://raw.githubusercontent.com/Ver1mod/temp/faa7a9dafe0261cd22a192093dc70b7a7c8368ed/test.lua", true))()
+-- loadstring(game:HttpGet("https://github.com/Ver1mod/temp/blob/a54f392a15ebbc0ff9552e243c8f2cb5318a3a20/test.lua", true))()
 -- v10 Super (Minimalist)
 -- Global Variables
 print("Active")
@@ -134,8 +134,15 @@ end)
 -- end
 
 example:AddButton("Set main gun", function(state)
-	_G.my_gun = Player.Character:FindFirstChildOfClass("Tool")
-	Instance.new("StringValue", _G.my_gun.Parent).Name = "MyGun"
+	if Player.Character:FindFirstChildOfClass("Tool"):GetAttribute("Ammo") ~= nil then
+		_G.my_gun = Player.Character:FindFirstChildOfClass("Tool")
+		--Instance.new("StringValue", _G.my_gun.Parent).Name = "MyGun"
+		for _, v in Player.Backpack:GetChildren() do
+			if v.ClassName == "Tool" and v:GetAttribute("Ammo") ~= nil then
+				v.Grip = CFrame.new(v.Grip.X, v.Grip.Y+30, v.Grip.Z) * v.Grip.Rotation
+			end
+		end
+	end
 end)
 
 local function auto_equip()
