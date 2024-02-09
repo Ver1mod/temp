@@ -1,11 +1,14 @@
+-- loadstring(game:HttpGet("https://raw.githubusercontent.com/Ver1mod/temp/faa7a9dafe0261cd22a192093dc70b7a7c8368ed/test.lua", true))()
 -- v10 Super (Minimalist)
 -- Global Variables
+print("Active")
+warn("Active")
 local Player = game.Players.LocalPlayer
 local BulletReplication = game:GetService("ReplicatedStorage").BulletReplication.ReplicateClient
 local Use_Storage = game:GetService("ReplicatedStorage").Remotes.UseStorage
 local NPCs = game.Workspace.NPCs
 
-function merge_tables(arg, value0)
+local function merge_tables(arg, value0)
 	local value = arg
 	for i, v in value0 do
 		table.insert(value, v)
@@ -18,7 +21,6 @@ local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Ver1m
 local example = library:CreateWindow({
 	text = "SCP: The Red Lake"
 })
-
 local example0 = library:CreateWindow({
 	text = "Items"
 })
@@ -101,7 +103,51 @@ example:AddToggle("Enable backpack bag", function(state)
 end)
 
 -- Aimbot modules
-function shot(weapon, enemy)
+local time_test = false
+local animation
+local animloader
+
+_G.is_shoot_animation = false
+example:AddToggle("Add gun animation", function(state)
+	local is_animating = state
+	while task.wait() and is_animating do
+		local Character = workspace:WaitForChild(Player.Name)
+		local Humanoid = Character:WaitForChild("Humanoid")
+		if _G.is_shoot_animation == true then
+			local animloader = Humanoid:LoadAnimation(_G.my_gun.ShootAnim)
+			animloader:Play()
+			task.wait(1/(_G.my_gun:GetAttribute("RPM")/40))
+		end
+	end
+end)
+
+-- local function my_gun()
+-- 	if not Player:FindFirstChild("MyGun") then
+-- 		if Player.Character:FindFirstChildOfClass("Tool") then
+-- 			Instance.new("StringValue", Player).Name = "MyGun"
+-- 			wait()
+-- 			if Player.Character:FindFirstChildOfClass("Tool").Name:GetAttribute("Ammo") ~= nil then
+-- 				Player:FindFirstChild("MyGun").Value = Player.Character:FindFirstChildOfClass("Tool").Name
+-- 			end
+-- 		end
+-- 	end
+-- end
+
+example:AddButton("Set main gun", function(state)
+	_G.my_gun = Player.Character:FindFirstChildOfClass("Tool")
+	Instance.new("StringValue", _G.my_gun.Parent).Name = "MyGun"
+end)
+
+local function auto_equip()
+	for _, v in Player.Backpack:GetChildren() do
+		local Ignored = v.Name == "Bloxy Cola" or v.Name == "Focus Potion"
+		if v:GetAttribute("Ammo") ~= nil or Ignored then
+			v.Parent = Player.Character
+		end
+	end
+end
+
+local function shot(weapon, enemy)
 	if weapon:GetAttribute("Ammo") ~= nil then
 		if Player:DistanceFromCharacter(enemy.Position) < weapon:GetAttribute("Range")*_G.Range then
 			weapon.Main:FireServer("MUZZLE", weapon.Handle.Barrel)
@@ -111,18 +157,10 @@ function shot(weapon, enemy)
 	end
 end
 
-function auto_equip()
-	for _, v in Player.Backpack:GetChildren() do
-		local Ignored = v.Name == "Bloxy Cola" or v.Name == "Focus Potion"
-		if v:GetAttribute("Ammo") ~= nil or Ignored then
-			v.Parent = Player.Character
-		end
-	end
-end
-
 -- Aimbot modes
 example:AddToggle("Auto Farm Mobs(Ex)", function(state)
 	_G.autofarm = state
+	_G.is_shoot_animation = state
 	while _G.autofarm do
 		pcall(function()
 			auto_equip()
@@ -147,6 +185,7 @@ end)
 
 example:AddToggle("Auto Farm Mobs", function(state)
 	_G.autofarm = state
+	_G.is_shoot_animation = state
 	while _G.autofarm do
 		wait()
 		pcall(function()
@@ -176,84 +215,61 @@ example:AddToggle("Auto Farm Mobs", function(state)
 	end
 end)
 
-function shot0(weapon, enemy)
-	if weapon:GetAttribute("Ammo") ~= nil then
-		if Player:DistanceFromCharacter(enemy.Position) < weapon:GetAttribute("Range")*_G.Range then
-			weapon.Main:FireServer("MUZZLE", weapon.Handle.Barrel)
-			for i = 1, 4 do
-				weapon.Main:FireServer("DAMAGE", {[1]=enemy,[2] = enemy.Position,[3]=100})
-			end
-			weapon.Main:FireServer("AMMO")
-		end
-	end
-end
+-- Auto mod detection
+example:AddToggle("Auto Disconnect", function(state)
+	_G.auto_disconnect = (state and true or false)
 
-example:AddToggle("Smart Fire", function(state)
-	_G.autofarm = state
-	while _G.autofarm do
-		wait()
-		pcall(function()
-			local enemy
-			local distance = 9216
+	if _G.auto_disconnect == false then
+		wait(0.5)
+	else
+		while _G.auto_disconnect == true do
+			local names = ""
+			local list = {
+				"Homboor", 
+				"Rynhex", 
+				"yuji071", 
+				"xXDrqgon", 
+				"deaconwtx", 
+				"Red_intern", 
+				"TrueShadowSpear", 
+				"GoszuGamer", 
+				"luckyluke1281mia",
+				"AntePavelicPoglavnik",
+				"happysully07",
+				"perciless",
+				"Steven_XP23",
+				"Chaosys",
+				"hack_tested"
+			}
 
-			local enemies = merge_tables(
-				NPCs.Monsters:GetChildren(), 
-				NPCs.Tango:GetChildren()
-			)
-
-			for i,v in enemies do
-				if Player:DistanceFromCharacter(v.Head.Position) < distance then
-					enemy = v
-					distance = Player:DistanceFromCharacter(v.Head.Position)
+			local mod = 0
+			local iter = 0
+			for i, player in pairs(game:GetService("Players"):GetChildren()) do --Get the table of players
+				local name = game:GetService("Players")[tostring(player)].Name --Nick of the loop's player
+				for i, n in list do
+					iter += 1
+					if name == n then
+						if names ~= "" then
+							names = names .. ", " .. name
+						else
+							names = name
+						end
+						print(n)
+						mod += 1
+					end
 				end
 			end
-
-			local v = enemy.Head
-			repeat task.wait()
-				auto_equip()
-				for _, tool in Player.Character:GetChildren() do
-					shot0(tool, v)
-				end
-			until v.Parent.Humanoid.Health == 0 or _G.autofarm == false
-		end)
-	end
-end)
-
--- Aimbot settings
-example:AddBox("Shots", function(object, focus)
-	if focus then
-		_G.Shots = 0
-		pcall(function()
-			_G.Shots = tonumber(object.Text)
-		end)
-	end
-end)
-
-example:AddButton("Shoot", function()
-	_G.autofarm = not _G.autofarm
-	local enemy
-	local distance = 9216
-
-	local enemies = merge_tables(
-		NPCs.Monsters:GetChildren(), 
-		NPCs.Tango:GetChildren()
-	)
-
-	for i,v in enemies do
-		if Player:DistanceFromCharacter(v.Head.Position) < distance then
-			enemy = v
-			distance = Player:DistanceFromCharacter(v.Head.Position)
-		end
-	end
-
-	local v = enemy.Head
-	for i = 1, _G.Shots do
-		auto_equip()
-		for _, tool in Player.Character:GetChildren() do
-			shot0(tool, v)
-		end
-		if v.Parent.Humanoid.Health == 0 or _G.autofarm == false then
-			break
+			print("Number of iterations:", iter)
+			if mod == 0 then
+				game:GetService("CoreGui").UILibrary:FindFirstChildOfClass("Frame").Name = "0 mods"
+				game:GetService("CoreGui").UILibrary:FindFirstChildOfClass("Frame").Window.Text = "0 mods"
+				-- print("The server hasn't any moderators")
+			else
+				game:GetService("CoreGui").UILibrary:FindFirstChildOfClass("Frame").Name = "DISCONNECT RIGHT NOW!!!"
+				game:GetService("CoreGui").UILibrary:FindFirstChildOfClass("Frame").Window.Text = "DISCONNECT RIGHT NOW!!!"
+				print("The server has", mod, "moderators")
+			end
+			wait(30)
 		end
 	end
 end)
