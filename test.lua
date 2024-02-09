@@ -1,7 +1,7 @@
 -- v10 Super (Minimalist)
 -- Global Variables
 
--- loadstring(game:HttpGet("https://raw.githubusercontent.com/Ver1mod/temp/7c1e276c2e2fac02c0f0ecf65823631141b3316c/test.lua", true))()
+-- loadstring(game:HttpGet("https://raw.githubusercontent.com/Ver1mod/temp/3fcf0db442ecfdde56eb71f9dabd70535c5315a0/test.lua", true))()
 coroutine.wrap(function()
 
 	local Player = game.Players.LocalPlayer
@@ -134,25 +134,20 @@ coroutine.wrap(function()
 	end
 	
 	local time_test = false
-	local function shot_animation(tool)
+	local animation
+	local animloader
+	local function shot_animation()
 		if time_test == false then
 			time_test = true
 
 			pcall(function()
-				--if animloader == nil or animation.Parent ~= tool then
-				if workspace:FindFirstChild(Player.Name) and workspace:FindFirstChild(Player.Name):FindFirstChild("Humanoid") then
-						local Character = workspace:FindFirstChild(Player.Name)
-						local Humanoid = Character:FindFirstChild("Humanoid")
+				if animloader == nil or animation.Parent ~= _G.my_gun then
+					animation = _G.my_gun.ShootAnim
+					animloader = _G.my_gun.Parent.Humanoid:LoadAnimation(animation)
+				end
 
-						local animloader = Humanoid:LoadAnimation(_G.my_gun.ShootAnim)
-						animloader:Play()
-						task.wait(1/(_G.my_gun:GetAttribute("RPM")/_G.Animation_speed))
-					end
-					--animation = tool.ShootAnim
-					--animloader = tool.Parent.Humanoid:LoadAnimation(animation)
-					--animloader:Play()
-					--wait(1/(tool:GetAttribute("RPM")/_G.Animation_speed))
-				--end
+				animloader:Play()
+				wait(1/(_G.my_gun:GetAttribute("RPM")/_G.Animation_speed))
 			end)
 
 			time_test = false
