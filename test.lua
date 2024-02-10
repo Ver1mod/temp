@@ -1,7 +1,7 @@
 -- v10 Super (Minimalist)
 -- Global Variables
 
--- loadstring(game:HttpGet("https://raw.githubusercontent.com/Ver1mod/temp/3fcf0db442ecfdde56eb71f9dabd70535c5315a0/test.lua", true))()
+-- fixed set main gun
 coroutine.wrap(function()
 
 	local Player = game.Players.LocalPlayer
@@ -114,10 +114,16 @@ coroutine.wrap(function()
 	-- Aimbot modules
 	example:AddButton("Set main gun", function(state)
 		if Player.Character:FindFirstChildOfClass("Tool"):GetAttribute("Ammo") ~= nil then
+			local gun = _G.my_gun
+			if gun:FindFirstChild("AntiDetection") then
+				gun.AntiDetection:Destroy()
+				gun.Grip = CFrame.new(gun.Grip.X, gun.Grip.Y-30, gun.Grip.Z) * gun.Grip.Rotation
+			end
 			_G.my_gun = Player.Character:FindFirstChildOfClass("Tool")
 			--Instance.new("StringValue", _G.my_gun.Parent).Name = "MyGun"
 			for _, v in Player.Backpack:GetChildren() do
-				if v.ClassName == "Tool" and v:GetAttribute("Ammo") ~= nil then
+				if v.ClassName == "Tool" and v:GetAttribute("Ammo") ~= nil and not v:FindFirstChild("AntiDetection") then
+					Instance.new("StringValue", v).Name = "AntiDetection"
 					v.Grip = CFrame.new(v.Grip.X, v.Grip.Y+30, v.Grip.Z) * v.Grip.Rotation
 				end
 			end
