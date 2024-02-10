@@ -1,7 +1,7 @@
 -- v10 Super (Minimalist)
 -- Global Variables
 
--- fixed set main gun
+-- bug fix
 coroutine.wrap(function()
 
 	local Player = game.Players.LocalPlayer
@@ -91,7 +91,7 @@ coroutine.wrap(function()
 			end)
 		end
 	end)
-	
+
 	example:AddBox("Animation Speed", function(object, focus)
 		if focus then
 			_G.Animation_speed = 45
@@ -114,12 +114,12 @@ coroutine.wrap(function()
 	-- Aimbot modules
 	example:AddButton("Set main gun", function(state)
 		if Player.Character:FindFirstChildOfClass("Tool"):GetAttribute("Ammo") ~= nil then
+			_G.my_gun = Player.Character:FindFirstChildOfClass("Tool")
 			local gun = _G.my_gun
 			if gun:FindFirstChild("AntiDetection") then
 				gun.AntiDetection:Destroy()
 				gun.Grip = CFrame.new(gun.Grip.X, gun.Grip.Y-30, gun.Grip.Z) * gun.Grip.Rotation
 			end
-			_G.my_gun = Player.Character:FindFirstChildOfClass("Tool")
 			--Instance.new("StringValue", _G.my_gun.Parent).Name = "MyGun"
 			for _, v in Player.Backpack:GetChildren() do
 				if v.ClassName == "Tool" and v:GetAttribute("Ammo") ~= nil and not v:FindFirstChild("AntiDetection") then
@@ -138,7 +138,7 @@ coroutine.wrap(function()
 			end
 		end
 	end
-	
+
 	local time_test = false
 	local animation
 	local animloader
@@ -159,7 +159,7 @@ coroutine.wrap(function()
 			time_test = false
 		end
 	end
-	
+
 	local function shot(weapon, enemy)
 		if weapon:GetAttribute("Ammo") ~= nil then
 			if Player:DistanceFromCharacter(enemy.Position) < weapon:GetAttribute("Range")*_G.Range then
