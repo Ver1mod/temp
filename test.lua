@@ -83,9 +83,11 @@ coroutine.wrap(function()
 		end
 	end)
 
+	_G.Range = 2
+	_G.Animation_speed = 60
 	example:AddBox("Range", function(object, focus)
 		if focus then
-			_G.Range = 3
+			_G.Range = 2
 			pcall(function()
 				_G.Range = tonumber(object.Text)
 			end)
@@ -94,7 +96,7 @@ coroutine.wrap(function()
 
 	example:AddBox("Animation Speed", function(object, focus)
 		if focus then
-			_G.Animation_speed = 45
+			_G.Animation_speed = 60
 			pcall(function()
 				_G.Animation_speed = tonumber(object.Text)
 			end)
@@ -131,7 +133,7 @@ coroutine.wrap(function()
 					Instance.new("Folder", v).Name = "StoragedAnims"
 					for _, anim in v:GetDescendants() do
 						if anim.ClassName == "Animation" then
-							Instance.new("ObjectValue", anim) = anim.Parent
+							Instance.new("ObjectValue", anim)
 							anim.Parent = v.StoragedAnims
 						end
 					end
