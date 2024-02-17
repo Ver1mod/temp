@@ -121,10 +121,10 @@ coroutine.wrap(function()
 			if gun:FindFirstChild("AntiDetection") then
 				gun.AntiDetection:Destroy()
 				for _, anim in gun.StoragedAnims:GetChildren() do
-					anim.Parent = anim.ObjectValue
+					anim.Parent = anim.ObjectValue.Value
 					anim.ObjectValue:Destroy()
 				end
-				gun.Grip = CFrame.new(gun.Grip.Position + gun.Grip.UpVector*-30) * gun.Grip.Rotation
+				gun.Grip = CFrame.new(gun.Grip.Position - gun.Grip.UpVector*30) * gun.Grip.Rotation
 			end
 			--Instance.new("StringValue", _G.my_gun.Parent).Name = "MyGun"
 			for _, v in Player.Backpack:GetChildren() do
