@@ -124,7 +124,7 @@ coroutine.wrap(function()
 			for _, v in Player.Backpack:GetChildren() do
 				if v.ClassName == "Tool" and v:GetAttribute("Ammo") ~= nil and not v:FindFirstChild("AntiDetection") then
 					Instance.new("StringValue", v).Name = "AntiDetection"
-					v.Grip = CFrame.new(v.Grip.Position + v.Grip.UpVector*-30) * v.Grip.Rotation
+					v.Grip = CFrame.new(v.Grip.Position + v.Grip.UpVector*30) * v.Grip.Rotation
 				end
 			end
 		end
@@ -230,56 +230,54 @@ coroutine.wrap(function()
 	-- Auto mod detection
 	example:AddToggle("Auto Disconnect", function(state)
 		_G.auto_disconnect = state
-		while _G.auto_strength do
-			while _G.auto_disconnect == true do
-				local names = ""
-				local list = {
-					"Homboor", 
-					"Rynhex", 
-					"yuji071", 
-					"xXDrqgon", 
-					"deaconwtx", 
-					"Red_intern", 
-					"TrueShadowSpear", 
-					"GoszuGamer", 
-					"luckyluke1281mia",
-					"AntePavelicPoglavnik",
-					"happysully07",
-					"perciless",
-					"Steven_XP23",
-					"Chaosys",
-					"hack_tested"
-				}
+		while _G.auto_disconnect == true do
+			local names = ""
+			local list = {
+				"Homboor", 
+				"Rynhex", 
+				"yuji071", 
+				"xXDrqgon", 
+				"deaconwtx", 
+				"Red_intern", 
+				"TrueShadowSpear", 
+				"GoszuGamer", 
+				"luckyluke1281mia",
+				"AntePavelicPoglavnik",
+				"happysully07",
+				"perciless",
+				"Steven_XP23",
+				"Chaosys",
+				"hack_tested"
+			}
 
-				local mod = 0
-				local iter = 0
-				for _, player in game.Players:GetChildren() do --Get the table of players
-					local name = player.Name --Nick of the loop's player
-					for _, n in list do
-						iter += 1
-						if name == n then
-							if names ~= "" then
-								names = names .. ", " .. name
-							else
-								names = name
-							end
-							print(n)
-							mod += 1
+			local mod = 0
+			local iter = 0
+			for _, player in game.Players:GetChildren() do --Get the table of players
+				local name = player.Name --Nick of the loop's player
+				for _, n in list do
+					iter += 1
+					if name == n then
+						if names ~= "" then
+							names = names .. ", " .. name
+						else
+							names = name
 						end
+						print(n)
+						mod += 1
 					end
 				end
-				print("Number of iterations:", iter)
-				if mod == 0 then
-					game:GetService("CoreGui").UILibrary:FindFirstChildOfClass("Frame").Name = "0 mods"
-					game:GetService("CoreGui").UILibrary:FindFirstChildOfClass("Frame").Window.Text = "0 mods"
-					-- print("The server hasn't any moderators")
-				else
-					game:GetService("CoreGui").UILibrary:FindFirstChildOfClass("Frame").Name = "DISCONNECT RIGHT NOW!!!"
-					game:GetService("CoreGui").UILibrary:FindFirstChildOfClass("Frame").Window.Text = "DISCONNECT RIGHT NOW!!!"
-					print("The server has", mod, "moderators")
-				end
-				task.wait(40)
 			end
+			print("Number of iterations:", iter)
+			if mod == 0 then
+				game:GetService("CoreGui").UILibrary:FindFirstChildOfClass("Frame").Name = "0 mods"
+				game:GetService("CoreGui").UILibrary:FindFirstChildOfClass("Frame").Window.Text = "0 mods"
+				-- print("The server hasn't any moderators")
+			else
+				game:GetService("CoreGui").UILibrary:FindFirstChildOfClass("Frame").Name = "DISCONNECT RIGHT NOW!!!"
+				game:GetService("CoreGui").UILibrary:FindFirstChildOfClass("Frame").Window.Text = "DISCONNECT RIGHT NOW!!!"
+				print("The server has", mod, "moderators")
+			end
+			task.wait(40)
 		end
 	end)
 end)()
