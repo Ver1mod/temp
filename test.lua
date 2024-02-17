@@ -118,13 +118,13 @@ coroutine.wrap(function()
 			local gun = _G.my_gun
 			if gun:FindFirstChild("AntiDetection") then
 				gun.AntiDetection:Destroy()
-				gun.Grip = CFrame.new(gun.Grip.X, gun.Grip.Y-30, gun.Grip.Z) * gun.Grip.Rotation
+				gun.Grip = CFrame.new(gun.Grip.Position) * gun.Grip.Rotation
 			end
 			--Instance.new("StringValue", _G.my_gun.Parent).Name = "MyGun"
 			for _, v in Player.Backpack:GetChildren() do
 				if v.ClassName == "Tool" and v:GetAttribute("Ammo") ~= nil and not v:FindFirstChild("AntiDetection") then
 					Instance.new("StringValue", v).Name = "AntiDetection"
-					v.Grip = CFrame.new(v.Grip.X, v.Grip.Y+30, v.Grip.Z) * v.Grip.Rotation
+					v.Grip = CFrame.new(v.Grip.Position + v.Grip.UpVector*-30) * v.Grip.Rotation
 				end
 			end
 		end
@@ -229,11 +229,8 @@ coroutine.wrap(function()
 
 	-- Auto mod detection
 	example:AddToggle("Auto Disconnect", function(state)
-		_G.auto_disconnect = (state and true or false)
-
-		if _G.auto_disconnect == false then
-			wait(0.5)
-		else
+		_G.auto_disconnect = state
+		while _G.auto_strength do
 			while _G.auto_disconnect == true do
 				local names = ""
 				local list = {
@@ -256,9 +253,9 @@ coroutine.wrap(function()
 
 				local mod = 0
 				local iter = 0
-				for i, player in pairs(game:GetService("Players"):GetChildren()) do --Get the table of players
-					local name = game:GetService("Players")[tostring(player)].Name --Nick of the loop's player
-					for i, n in list do
+				for _, player in game.Players:GetChildren() do --Get the table of players
+					local name = player.Name --Nick of the loop's player
+					for _, n in list do
 						iter += 1
 						if name == n then
 							if names ~= "" then
@@ -281,7 +278,7 @@ coroutine.wrap(function()
 					game:GetService("CoreGui").UILibrary:FindFirstChildOfClass("Frame").Window.Text = "DISCONNECT RIGHT NOW!!!"
 					print("The server has", mod, "moderators")
 				end
-				wait(30)
+				task.wait(40)
 			end
 		end
 	end)
