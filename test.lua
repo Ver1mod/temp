@@ -1,9 +1,8 @@
 -- v10 Super (Minimalist)
 -- Global Variables
 
--- Improved perfomance and deleted deleting animations (based on commit 6dbcfba)
+-- Fixed bugs (based on commit 6dbcfba)
 coroutine.wrap(function()
-
 	local Player = game.Players.LocalPlayer
 	local BulletReplication = game:GetService("ReplicatedStorage").BulletReplication.ReplicateClient
 	local Use_Storage = game:GetService("ReplicatedStorage").Remotes.UseStorage
@@ -144,15 +143,19 @@ coroutine.wrap(function()
 	local animloader
 	local function shot_animation()
 		while _G.autofarm do
+			local is_succeful = false
 			pcall(function()
 				if animloader == nil or animation.Parent ~= _G.my_gun then
 					animation = _G.my_gun.ShootAnim
 					animloader = _G.my_gun.Parent.Humanoid:LoadAnimation(animation)
 				end
-
 				animloader:Play()
 				task.wait(1/(_G.my_gun:GetAttribute("RPM")/_G.Animation_speed))
+				is_succeful = true
 			end)
+			if not is_succeful then
+				task.wait()
+			end
 		end
 	end
 
