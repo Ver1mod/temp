@@ -1,7 +1,7 @@
 -- v10 Super (Minimalist)
 -- Global Variables
 
--- bug fix
+-- Improved perfomance and deleted deleting animations (based on commit 6dbcfba)
 coroutine.wrap(function()
 
 	local Player = game.Players.LocalPlayer
@@ -83,11 +83,9 @@ coroutine.wrap(function()
 		end
 	end)
 
-	_G.Range = 2
-	_G.Animation_speed = 60
 	example:AddBox("Range", function(object, focus)
 		if focus then
-			_G.Range = 2
+			_G.Range = 3
 			pcall(function()
 				_G.Range = tonumber(object.Text)
 			end)
@@ -96,7 +94,7 @@ coroutine.wrap(function()
 
 	example:AddBox("Animation Speed", function(object, focus)
 		if focus then
-			_G.Animation_speed = 60
+			_G.Animation_speed = 45
 			pcall(function()
 				_G.Animation_speed = tonumber(object.Text)
 			end)
@@ -120,23 +118,12 @@ coroutine.wrap(function()
 			local gun = _G.my_gun
 			if gun:FindFirstChild("AntiDetection") then
 				gun.AntiDetection:Destroy()
-				for _, anim in gun.StoragedAnims:GetChildren() do
-					anim.Parent = anim.ObjectValue.Value
-					anim.ObjectValue:Destroy()
-				end
-				gun.Grip = CFrame.new(gun.Grip.Position - gun.Grip.UpVector*30) * gun.Grip.Rotation
+				gun.Grip = CFrame.new(gun.Grip.Position) * gun.Grip.Rotation
 			end
 			--Instance.new("StringValue", _G.my_gun.Parent).Name = "MyGun"
 			for _, v in Player.Backpack:GetChildren() do
 				if v.ClassName == "Tool" and v:GetAttribute("Ammo") ~= nil and not v:FindFirstChild("AntiDetection") then
 					Instance.new("StringValue", v).Name = "AntiDetection"
-					Instance.new("Folder", v).Name = "StoragedAnims"
-					for _, anim in v:GetDescendants() do
-						if anim.ClassName == "Animation" then
-							Instance.new("ObjectValue", anim)
-							anim.Parent = v.StoragedAnims
-						end
-					end
 					v.Grip = CFrame.new(v.Grip.Position + v.Grip.UpVector*30) * v.Grip.Rotation
 				end
 			end
@@ -156,9 +143,7 @@ coroutine.wrap(function()
 	local animation
 	local animloader
 	local function shot_animation()
-		if time_test == false then
-			time_test = true
-
+		while _G.autofarm do
 			pcall(function()
 				if animloader == nil or animation.Parent ~= _G.my_gun then
 					animation = _G.my_gun.ShootAnim
@@ -166,10 +151,8 @@ coroutine.wrap(function()
 				end
 
 				animloader:Play()
-				wait(1/(_G.my_gun:GetAttribute("RPM")/_G.Animation_speed))
+				task.wait(1/(_G.my_gun:GetAttribute("RPM")/_G.Animation_speed))
 			end)
-
-			time_test = false
 		end
 	end
 
@@ -179,7 +162,6 @@ coroutine.wrap(function()
 				weapon.Main:FireServer("MUZZLE", weapon.Handle.Barrel)
 				weapon.Main:FireServer("DAMAGE", {[1]=enemy,[2] = enemy.Position,[3]=100})
 				weapon.Main:FireServer("AMMO")
-				coroutine.wrap(shot_animation)()
 			end
 		end
 	end
@@ -187,6 +169,7 @@ coroutine.wrap(function()
 	-- Aimbot modes
 	example:AddToggle("Auto Farm Mobs(Ex)", function(state)
 		_G.autofarm = state
+		shot_animation()
 		while _G.autofarm do
 			pcall(function()
 				auto_equip()
@@ -211,6 +194,7 @@ coroutine.wrap(function()
 
 	example:AddToggle("Auto Farm Mobs", function(state)
 		_G.autofarm = state
+		shot_animation()
 		while _G.autofarm do
 			wait()
 			pcall(function()
@@ -241,56 +225,63 @@ coroutine.wrap(function()
 	end)
 
 	-- Auto mod detection
-	example:AddToggle("Auto Disconnect", function(state)
-		_G.auto_disconnect = state
-		while _G.auto_disconnect == true do
-			local names = ""
-			local list = {
-				"Homboor", 
-				"Rynhex", 
-				"yuji071", 
-				"xXDrqgon", 
-				"deaconwtx", 
-				"Red_intern", 
-				"TrueShadowSpear", 
-				"GoszuGamer", 
-				"luckyluke1281mia",
-				"AntePavelicPoglavnik",
-				"happysully07",
-				"perciless",
-				"Steven_XP23",
-				"Chaosys",
-				"hack_tested"
-			}
-
-			local mod = 0
-			local iter = 0
-			for _, player in game.Players:GetChildren() do --Get the table of players
-				local name = player.Name --Nick of the loop's player
-				for _, n in list do
-					iter += 1
-					if name == n then
-						if names ~= "" then
-							names = names .. ", " .. name
-						else
-							names = name
-						end
-						print(n)
-						mod += 1
+	local connection
+	local function scan_players()
+		local names = ""
+		local list = {
+			"Homboor", 
+			"Rynhex", 
+			"yuji071", 
+			"xXDrqgon", 
+			"deaconwtx", 
+			"Red_intern", 
+			"TrueShadowSpear", 
+			"GoszuGamer", 
+			"luckyluke1281mia",
+			"AntePavelicPoglavnik",
+			"happysully07",
+			"perciless",
+			"Steven_XP23",
+			"Chaosys",
+			"hack_tested"
+		}
+		local mod = 0
+		local iter = 0
+		for _, player in game.Players:GetChildren() do --Get the table of players
+			local name = player.Name --Nick of the loop's player
+			for _, n in list do
+				iter += 1
+				if name == n then
+					if names ~= "" then
+						names = names .. ", " .. name
+					else
+						names = name
 					end
+					print(n)
+					mod += 1
 				end
 			end
-			print("Number of iterations:", iter)
-			if mod == 0 then
-				game:GetService("CoreGui").UILibrary:FindFirstChildOfClass("Frame").Name = "0 mods"
-				game:GetService("CoreGui").UILibrary:FindFirstChildOfClass("Frame").Window.Text = "0 mods"
-				-- print("The server hasn't any moderators")
-			else
-				game:GetService("CoreGui").UILibrary:FindFirstChildOfClass("Frame").Name = "DISCONNECT RIGHT NOW!!!"
-				game:GetService("CoreGui").UILibrary:FindFirstChildOfClass("Frame").Window.Text = "DISCONNECT RIGHT NOW!!!"
-				print("The server has", mod, "moderators")
-			end
-			task.wait(40)
 		end
+		print("Number of iterations:", iter)
+		if mod == 0 then
+			game:GetService("CoreGui").UILibrary:FindFirstChildOfClass("Frame").Name = "0 mods"
+			game:GetService("CoreGui").UILibrary:FindFirstChildOfClass("Frame").Window.Text = "0 mods"
+			-- print("The server hasn't any moderators")
+		else
+			game:GetService("CoreGui").UILibrary:FindFirstChildOfClass("Frame").Name = "DISCONNECT RIGHT NOW!!!"
+			game:GetService("CoreGui").UILibrary:FindFirstChildOfClass("Frame").Window.Text = "DISCONNECT RIGHT NOW!!!"
+			print("The server has", mod, "moderators")
+		end
+	end
+	scan_players()
+	example:AddToggle("Auto Disconnect", function(state)
+		_G.auto_disconnect = state
+		connection = game.Players.PlayerAdded:Connect(function(player)
+			if _G.auto_disconnect == false then
+				connection:Disconnect()
+			elseif _G.auto_disconnect == true then
+				scan_players()
+			end
+		end)
 	end)
 end)()
