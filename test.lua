@@ -1,7 +1,7 @@
 -- v10 Super (Minimalist)
 -- Global Variables
 
--- Fixed bugs (based on commit 6dbcfba)
+-- Improved anti moderator and fixed set main
 coroutine.wrap(function()
 	local Player = game.Players.LocalPlayer
 	local BulletReplication = game:GetService("ReplicatedStorage").BulletReplication.ReplicateClient
@@ -117,7 +117,7 @@ coroutine.wrap(function()
 			local gun = _G.my_gun
 			if gun:FindFirstChild("AntiDetection") then
 				gun.AntiDetection:Destroy()
-				gun.Grip = CFrame.new(gun.Grip.Position) * gun.Grip.Rotation
+				gun.Grip = CFrame.new(gun.Grip.Position - gun.Grip.UpVector*30) * gun.Grip.Rotation
 			end
 			--Instance.new("StringValue", _G.my_gun.Parent).Name = "MyGun"
 			for _, v in Player.Backpack:GetChildren() do
@@ -131,8 +131,7 @@ coroutine.wrap(function()
 
 	local function auto_equip()
 		for _, v in Player.Backpack:GetChildren() do
-			local Ignored = v.Name == "Bloxy Cola" or v.Name == "Focus Potion"
-			if v:GetAttribute("Ammo") ~= nil or Ignored then
+			if v:GetAttribute("Ammo") ~= nil then
 				v.Parent = Player.Character
 			end
 		end
@@ -142,29 +141,30 @@ coroutine.wrap(function()
 	local animation
 	local animloader
 	local function shot_animation()
-		while _G.autofarm do
-			local is_succeful = false
+		if time_test == false then
+			time_test = true
+
 			pcall(function()
 				if animloader == nil or animation.Parent ~= _G.my_gun then
 					animation = _G.my_gun.ShootAnim
 					animloader = _G.my_gun.Parent.Humanoid:LoadAnimation(animation)
 				end
+
 				animloader:Play()
-				task.wait(1/(_G.my_gun:GetAttribute("RPM")/_G.Animation_speed))
-				is_succeful = true
+				wait(1/(_G.my_gun:GetAttribute("RPM")/_G.Animation_speed))
 			end)
-			if not is_succeful then
-				task.wait()
-			end
+
+			time_test = false
 		end
 	end
-
+	
 	local function shot(weapon, enemy)
 		if weapon:GetAttribute("Ammo") ~= nil then
 			if Player:DistanceFromCharacter(enemy.Position) < weapon:GetAttribute("Range")*_G.Range then
 				weapon.Main:FireServer("MUZZLE", weapon.Handle.Barrel)
 				weapon.Main:FireServer("DAMAGE", {[1]=enemy,[2] = enemy.Position,[3]=100})
 				weapon.Main:FireServer("AMMO")
+				coroutine.wrap(shot_animation)()
 			end
 		end
 	end
@@ -172,7 +172,6 @@ coroutine.wrap(function()
 	-- Aimbot modes
 	example:AddToggle("Auto Farm Mobs(Ex)", function(state)
 		_G.autofarm = state
-		shot_animation()
 		while _G.autofarm do
 			pcall(function()
 				auto_equip()
@@ -197,7 +196,6 @@ coroutine.wrap(function()
 
 	example:AddToggle("Auto Farm Mobs", function(state)
 		_G.autofarm = state
-		shot_animation()
 		while _G.autofarm do
 			wait()
 			pcall(function()
