@@ -1,7 +1,7 @@
 -- v10 Super (Minimalist)
 -- Global Variables
 
--- Improved anti moderator and fixed set main
+-- Improved perfomance and added some features
 coroutine.wrap(function()
 	local Player = game.Players.LocalPlayer
 	local BulletReplication = game:GetService("ReplicatedStorage").BulletReplication.ReplicateClient
@@ -26,15 +26,15 @@ coroutine.wrap(function()
 	})
 
 	-- Auto potions
+	local auto_strength = false
 	example0:AddToggle("Strength Mixture", function(state)
-		_G.auto_strength = state
-		while _G.auto_strength do
+		auto_strength = state
+		while auto_strength do
 			pcall(function()
 				if Player.Character.Humanoid.Health ~= 0 then
-					local ohString1 = "WITHDRAW"
 					local ohString2 = "Strength Mixture"
 					if not Player.Backpack:FindFirstChild("Strength Mixture") and not Player.Character:FindFirstChild("Strength Mixture") then
-						Use_Storage:FireServer(ohString1, ohString2)
+						Use_Storage:FireServer("WITHDRAW", ohString2)
 					end
 					Player.Backpack:WaitForChild("Strength Mixture").Parent = Player.Character
 					Player.Character:WaitForChild("Strength Mixture").Use:FireServer(Vector3.new(0,0,0))
@@ -44,65 +44,92 @@ coroutine.wrap(function()
 			task.wait()
 		end
 	end)
-
+	example0:AddToggle("Absorb Mixture", function(state)
+		auto_strength = state
+		while auto_strength do
+			pcall(function()
+				if Player.Character.Humanoid.Health ~= 0 then
+					local ohString2 = "Absorb Mixture"
+					if not Player.Backpack:FindFirstChild("Absorb Mixture") and not Player.Character:FindFirstChild("Strength Mixture") then
+						Use_Storage:FireServer("WITHDRAW", ohString2)
+					end
+					Player.Backpack:WaitForChild("Absorb Mixture").Parent = Player.Character
+					Player.Character:WaitForChild("Absorb Mixture").Use:FireServer(Vector3.new(0,0,0))
+					wait(30)
+				end
+			end)
+			task.wait()
+		end
+	end)
 	-- Auto bring items
 	example0:AddButton("Teleport Device", function(state)
-		local ohString1 = "WITHDRAW"
 		local ohString2 = "Teleport Device"
-		Use_Storage:FireServer(ohString1, ohString2)
+		Use_Storage:FireServer("WITHDRAW", ohString2)
 		Player.Backpack:WaitForChild(ohString2).Parent = Player.Character
 		Player.Character:WaitForChild(ohString2).Use:FireServer(Vector3.new(0,0,0))
 	end)
 
 	example0:AddButton("Smoke Grenade", function(state)
-		local ohString1 = "WITHDRAW"
 		local ohString2 = "Smoke Grenade"
-		Use_Storage:FireServer(ohString1, ohString2)
+		Use_Storage:FireServer("WITHDRAW", ohString2)
 	end)
 
 	example0:AddButton("Scan Grenade", function(state)
-		local ohString1 = "WITHDRAW"
 		local ohString2 = "Scan Grenade"
-		Use_Storage:FireServer(ohString1, ohString2)
+		Use_Storage:FireServer("WITHDRAW", ohString2)
 	end)
 
 	example0:AddButton("Aura Grenade", function(state)
-		local ohString1 = "WITHDRAW"
 		local ohString2 = "Aura Grenade"
-		Use_Storage:FireServer(ohString1, ohString2)
+		Use_Storage:FireServer("WITHDRAW", ohString2)
+	end)
+
+	example0:AddButton("Deposit", function(state)
+		local tool = Player.Character:FindFirstChildOfClass("Tool")
+		if tool:GetAttribute("FromStorage") == true then
+			Use_Storage:FireServer("DEPOSIT", tool.Name)
+		end
+	end)
+
+	example0:AddButton("Bulk scrap", function(state)
+		Player.PlayerGui.BulkScrap.Enabled = true
 	end)
 
 	-- Aimbot settings
+	local RPM = 0
 	example:AddBox("RPM", function(object, focus)
 		if focus then
-			_G.RPM = 0
+			RPM = 0
 			pcall(function()
-				_G.RPM = 1/tonumber(object.Text)*60
+				RPM = 1/tonumber(object.Text)*60
 			end)
 		end
 	end)
 
+	local Range = 2
 	example:AddBox("Range", function(object, focus)
 		if focus then
-			_G.Range = 3
+			Range = 2
 			pcall(function()
-				_G.Range = tonumber(object.Text)
+				Range = tonumber(object.Text)
 			end)
 		end
 	end)
 
+	local Animation_speed = 60
 	example:AddBox("Animation Speed", function(object, focus)
 		if focus then
-			_G.Animation_speed = 45
+			Animation_speed = 60
 			pcall(function()
-				_G.Animation_speed = tonumber(object.Text)
+				Animation_speed = tonumber(object.Text)
 			end)
 		end
 	end)
 	-- Backpack hack
+	local backpack_hack = false
 	example:AddToggle("Enable backpack bag", function(state)
-		_G.backpack_hack = state
-		while _G.backpack_hack do
+		backpack_hack = state
+		while backpack_hack do
 			pcall(function()
 				fireproximityprompt(Player.Character.BackpackBag.Handle.Template)
 			end)
@@ -111,10 +138,11 @@ coroutine.wrap(function()
 	end)
 
 	-- Aimbot modules
+	local my_gun
 	example:AddButton("Set main gun", function(state)
 		if Player.Character:FindFirstChildOfClass("Tool"):GetAttribute("Ammo") ~= nil then
-			_G.my_gun = Player.Character:FindFirstChildOfClass("Tool")
-			local gun = _G.my_gun
+			my_gun = Player.Character:FindFirstChildOfClass("Tool")
+			local gun = my_gun
 			if gun:FindFirstChild("AntiDetection") then
 				gun.AntiDetection:Destroy()
 				gun.Grip = CFrame.new(gun.Grip.Position - gun.Grip.UpVector*30) * gun.Grip.Rotation
@@ -145,22 +173,22 @@ coroutine.wrap(function()
 			time_test = true
 
 			pcall(function()
-				if animloader == nil or animation.Parent ~= _G.my_gun then
-					animation = _G.my_gun.ShootAnim
-					animloader = _G.my_gun.Parent.Humanoid:LoadAnimation(animation)
+				if animloader == nil or animation.Parent ~= my_gun then
+					animation = my_gun.ShootAnim
+					animloader = my_gun.Parent.Humanoid:LoadAnimation(animation)
 				end
 
 				animloader:Play()
-				wait(1/(_G.my_gun:GetAttribute("RPM")/_G.Animation_speed))
+				wait(1/(my_gun:GetAttribute("RPM")/Animation_speed))
 			end)
 
 			time_test = false
 		end
 	end
-	
+
 	local function shot(weapon, enemy)
 		if weapon:GetAttribute("Ammo") ~= nil then
-			if Player:DistanceFromCharacter(enemy.Position) < weapon:GetAttribute("Range")*_G.Range then
+			if Player:DistanceFromCharacter(enemy.Position) < weapon:GetAttribute("Range")*Range then
 				weapon.Main:FireServer("MUZZLE", weapon.Handle.Barrel)
 				weapon.Main:FireServer("DAMAGE", {[1]=enemy,[2] = enemy.Position,[3]=100})
 				weapon.Main:FireServer("AMMO")
@@ -170,9 +198,10 @@ coroutine.wrap(function()
 	end
 
 	-- Aimbot modes
+	local autofarm = false
 	example:AddToggle("Auto Farm Mobs(Ex)", function(state)
-		_G.autofarm = state
-		while _G.autofarm do
+		autofarm = state
+		while autofarm do
 			pcall(function()
 				auto_equip()
 				local enemies = merge_tables(
@@ -186,7 +215,7 @@ coroutine.wrap(function()
 						for _, tool in Player.Character:GetChildren() do
 							shot(tool, v)
 						end
-						task.wait(_G.RPM)
+						task.wait(RPM)
 					end
 				end
 			end)
@@ -195,8 +224,8 @@ coroutine.wrap(function()
 	end)
 
 	example:AddToggle("Auto Farm Mobs", function(state)
-		_G.autofarm = state
-		while _G.autofarm do
+		autofarm = state
+		while autofarm do
 			wait()
 			pcall(function()
 				local enemy
@@ -220,7 +249,7 @@ coroutine.wrap(function()
 					for _, tool in Player.Character:GetChildren() do
 						shot(tool, v)
 					end
-				until v.Parent.Humanoid.Health == 0 or _G.autofarm == false
+				until v.Parent.Humanoid.Health == 0 or autofarm == false
 			end)
 		end
 	end)
