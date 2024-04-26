@@ -49,17 +49,17 @@ local _Flight = (function()
 		flyPart = flyPart or Instance.new("Part")
 		flyPart.Anchored = true
 
-    	local mainPart = workspace["Transport Heli"].Main
+    	local mainPart = workspace.ATV.Seat
 		
-		if workspace["Transport Heli"].Main then
+		if workspace.ATV.Seat then
 			flyPart.CFrame = mainPart.CFrame
 		end
 		
 		lib.connect("fly", RunService.Heartbeat:Connect(function()
 			if not character or not character.Parent or not character:FindFirstChild("HumanoidRootPart") then
 				return 
-			elseif not workspace["Transport Heli"].Main then
-				mainPart = workspace["Transport Heli"].Main
+			elseif not workspace.ATV.Seat then
+				mainPart = workspace.ATV.Seat
 				flyPart.CFrame = mainPart.CFrame
 			end
 
