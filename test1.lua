@@ -3,8 +3,6 @@ local example = library:CreateWindow({
 	text = "Taxi"
 })
 
-local Vehicles = workspace.Vehicles
-
 local _Flight = (function()
 	--// Variables
 	local RunService = game:GetService("RunService")
