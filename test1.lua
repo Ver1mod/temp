@@ -26,29 +26,31 @@ coroutine.wrap(function()
 
 	-- Auto potions
 	local auto_strength = false
+	local auto_absorb = false
+	local auto_mixture = false
 	example0:AddToggle("Strength Mixture", function(state)
 		auto_strength = state
+		local ohString2 = "Strength Mixture"
 		while auto_strength do
 			pcall(function()
 				if Player.Character.Humanoid.Health ~= 0 then
-					local ohString2 = "Strength Mixture"
 					if not Player.Backpack:FindFirstChild("Strength Mixture") and not Player.Character:FindFirstChild("Strength Mixture") then
 						Use_Storage:FireServer("WITHDRAW", ohString2)
 					end
 					Player.Backpack:WaitForChild("Strength Mixture").Parent = Player.Character
 					Player.Character:WaitForChild("Strength Mixture").Use:FireServer(Vector3.new(0,0,0))
-					wait(16)
+					wait(15)
 				end
 			end)
 			task.wait()
 		end
 	end)
 	example0:AddToggle("Absorb Mixture", function(state)
-		auto_strength = state
-		while auto_strength do
+		auto_absorb = state
+		local ohString2 = "Absorb Mixture"
+		while auto_absorb do
 			pcall(function()
 				if Player.Character.Humanoid.Health ~= 0 then
-					local ohString2 = "Absorb Mixture"
 					if not Player.Backpack:FindFirstChild("Absorb Mixture") and not Player.Character:FindFirstChild("Strength Mixture") then
 						Use_Storage:FireServer("WITHDRAW", ohString2)
 						Player.Backpack:WaitForChild("Absorb Mixture").Parent = Player.Character
@@ -56,7 +58,25 @@ coroutine.wrap(function()
 						Player.Backpack["Absorb Mixture"].Parent = Player.Character
 					end
 					Player.Character["Absorb Mixture"].Use:FireServer(Vector3.new(0,0,0))
-					wait(31)
+					wait(30)
+				end
+			end)
+			task.wait()
+		end
+	end)
+	example0:AddToggle("Mixture", function(state)
+		auto_mixture = state
+		while auto_mixture do
+			pcall(function()
+				if Player.Character.Humanoid.Health ~= 0 then
+					if not Player.Backpack:FindFirstChild("Mixture") and not Player.Character:FindFirstChild("Mixture") then
+						game:GetService("ReplicatedStorage").Remotes.BuyWeapon:FireServer("Mixture")
+						Player.Backpack:WaitForChild("Mixture").Parent = Player.Character
+					elseif Player.Backpack:FindFirstChild("Mixture") then
+						Player.Backpack.Mixture.Parent = Player.Character
+					end
+					Player.Character:WaitForChild("Mixture").Use:FireServer(Vector3.new(0,0,0))
+					task.wait(2.6)
 				end
 			end)
 			task.wait()
