@@ -1,7 +1,6 @@
 -- v10 Super (Perfomance)
 -- Global Variables
 
--- Fixed potions
 coroutine.wrap(function()
 	local Player = game.Players.LocalPlayer
 	local BulletReplication = game:GetService("ReplicatedStorage").BulletReplication.ReplicateClient
@@ -35,12 +34,10 @@ coroutine.wrap(function()
 					local ohString2 = "Strength Mixture"
 					if not Player.Backpack:FindFirstChild("Strength Mixture") and not Player.Character:FindFirstChild("Strength Mixture") then
 						Use_Storage:FireServer("WITHDRAW", ohString2)
-						Player.Backpack:WaitForChild("Strength Mixture").Parent = Player.Character
-					elseif Player.Backpack:FindFirstChild("Strength Mixture") then
-						Player.Backpack["Strength Mixture"].Parent = Player.Character
 					end
+					Player.Backpack:WaitForChild("Strength Mixture").Parent = Player.Character
 					Player.Character:WaitForChild("Strength Mixture").Use:FireServer(Vector3.new(0,0,0))
-					wait(14)
+					wait(16)
 				end
 			end)
 			task.wait()
@@ -54,12 +51,12 @@ coroutine.wrap(function()
 					local ohString2 = "Absorb Mixture"
 					if not Player.Backpack:FindFirstChild("Absorb Mixture") and not Player.Character:FindFirstChild("Strength Mixture") then
 						Use_Storage:FireServer("WITHDRAW", ohString2)
-						Player.Backpack["Absorb Mixture"].Parent = Player.Character
+						Player.Backpack:WaitForChild("Absorb Mixture").Parent = Player.Character
 					elseif Player.Backpack:FindFirstChild("Absorb Mixture") then
 						Player.Backpack["Absorb Mixture"].Parent = Player.Character
 					end
-					Player.Character:WaitForChild("Absorb Mixture").Use:FireServer(Vector3.new(0,0,0))
-					wait(29)
+					Player.Character["Absorb Mixture"].Use:FireServer(Vector3.new(0,0,0))
+					wait(31)
 				end
 			end)
 			task.wait()
