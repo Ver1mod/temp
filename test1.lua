@@ -39,7 +39,7 @@ coroutine.wrap(function()
 					end
 					Player.Backpack:WaitForChild("Strength Mixture").Parent = Player.Character
 					Player.Character:WaitForChild("Strength Mixture").Use:FireServer(Vector3.new(0,0,0))
-					wait(15)
+					wait(16)
 				end
 			end)
 			task.wait()
@@ -58,7 +58,7 @@ coroutine.wrap(function()
 						Player.Backpack["Absorb Mixture"].Parent = Player.Character
 					end
 					Player.Character["Absorb Mixture"].Use:FireServer(Vector3.new(0,0,0))
-					wait(30)
+					wait(31)
 				end
 			end)
 			task.wait()
@@ -82,6 +82,7 @@ coroutine.wrap(function()
 			task.wait()
 		end
 	end)
+	
 	-- Auto bring items
 	example0:AddButton("Teleport Device", function(state)
 		local ohString2 = "Teleport Device"
