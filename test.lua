@@ -1,7 +1,7 @@
 -- v10 Super (Quiet)
 -- Global Variables
 
--- Added new aimbot mode + fixed bug that apperared on enabling multiple modes
+-- Improved aimbot
 coroutine.wrap(function()
 	local Player = game.Players.LocalPlayer
 	local BulletReplication = game:GetService("ReplicatedStorage").BulletReplication.ReplicateClient
@@ -202,7 +202,7 @@ coroutine.wrap(function()
 				end
 
 				animloader:Play()
-				wait(1/(my_gun:GetAttribute("RPM")/Animation_speed))
+				task.wait(1/(my_gun:GetAttribute("RPM")/Animation_speed))
 			end)
 
 			time_test = false
@@ -283,20 +283,38 @@ coroutine.wrap(function()
 		autofarm_experimental = state
 		local i0 = 1
 		local tools = {}
+		local enemies = merge_tables(
+			NPCs.Monsters:GetChildren(), 
+			NPCs.Tango:GetChildren()
+		)
+		
+		local connections = {}
+		connections[1] = NPCs.Monsters.ChildAdded:Connect(function(child)
+			table.insert(enemies, child)
+		end)
+		connections[2] = NPCs.Tango.ChildAdded:Connect(function(child)
+			table.insert(enemies, child)
+		end)
+		connections[3] = NPCs.Monsters.ChildRemoved:Connect(function(child)
+			local target = table.find(enemies, child)
+			table.remove(enemies, target)
+		end)
+		connections[4] = NPCs.Tango.ChildRemoved:Connect(function(child)
+			local target = table.find(enemies, child)
+			table.remove(enemies, target)
+		end)
+		
 		while autofarm_experimental do
 			pcall(function()
 				auto_equip()
-				local enemies = merge_tables(
-					NPCs.Monsters:GetChildren(), 
-					NPCs.Tango:GetChildren()
-				)
 				tools = {}
 				for _, tool in Player.Character:GetChildren() do
 					if tool:GetAttribute("Ammo") ~= nil then
 						table.insert(tools, tool)
 					end
 				end
-				for i in enemies do
+				local i = 1
+				while #enemies - i >= 0 do
 					if tools[i0] == nil then
 						i0 = 1
 					end
@@ -305,9 +323,9 @@ coroutine.wrap(function()
 					local weapon = tools[i0]
 					local found = false
 					if enemy.Parent.Name ~= "Deceased" and enemy.Humanoid.Health > 0 then
-						if Player:DistanceFromCharacter(enemy.Head.Position) >= weapon:GetAttribute("Range")*2 then
+						if Player:DistanceFromCharacter(enemy.Head.Position) >= weapon:GetAttribute("Range")*Range then
 							for index, tool in tools do
-								if Player:DistanceFromCharacter(enemy.Head.Position) < tool:GetAttribute("Range")*2 and index > i0 then
+								if Player:DistanceFromCharacter(enemy.Head.Position) < tool:GetAttribute("Range")*Range and index > i0 then
 									weapon = tool
 									found = true
 								end
@@ -320,11 +338,15 @@ coroutine.wrap(function()
 						end
 						shot(weapon, enemy.Head)
 						i0 += 1
-						task.wait(_G.RPM)
-					end			
+						task.wait(RPM)
+					end
+					i += 1
 				end
 			end)
 			task.wait()
+		end
+		for v in connections do
+			v:Disconnect()
 		end
 	end)
 
