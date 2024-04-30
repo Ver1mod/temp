@@ -251,7 +251,7 @@ example:AddToggle("Auto Farm Mobs(Hard)", function(state)
 		end)
 		connections[6] = character.ChildRemoved:Connect(function(tool)
 			if tool:GetAttribute("Ammo") ~= nil then
-				local target = table.find(tool)
+				local target = table.find(tools, tool)
 				table.remove(tools, target)
 			end
 		end)
