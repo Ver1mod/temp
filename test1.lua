@@ -241,7 +241,7 @@ example:AddToggle("Auto Farm Mobs(Hard)", function(state)
 			table.insert(tools, tool)
 		end
 	end
-	
+
 	local connections = {}
 	local function set_tools(character)
 		connections[5] = character.ChildAdded:Connect(function(tool)
@@ -262,7 +262,7 @@ example:AddToggle("Auto Farm Mobs(Hard)", function(state)
 		connections[5]:Disconnect()
 		connections[6]:Disconnect()
 	end)
-	
+
 	connections[1] = NPCs.Monsters.ChildAdded:Connect(function(child)
 		table.insert(enemies, child)
 	end)
@@ -279,7 +279,7 @@ example:AddToggle("Auto Farm Mobs(Hard)", function(state)
 	end)
 
 	local i = 1
-	while _G.autofarm_experimental and task.wait() do
+	while autofarm_experimental and task.wait() do
 		auto_equip()
 		if enemies[1] == nil or tools[1] == nil then
 			continue
@@ -313,7 +313,7 @@ example:AddToggle("Auto Farm Mobs(Hard)", function(state)
 		end
 		i += 1
 	end
-	
+
 	for v in connections do
 		v:Disconnect()
 	end
