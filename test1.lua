@@ -315,7 +315,7 @@ example:AddToggle("Auto Farm Mobs(Hard)", function(state)
 		i += 1
 	end
 
-	for v in connections do
+	for _, v in connections do
 		v:Disconnect()
 	end
 end)
