@@ -308,8 +308,10 @@ example:AddToggle("Auto Farm Mobs(Hard)", function(state)
 			i0 += 1
 		end
 		if i1 >= Hardness then
+			i1 = 1
 			task.wait()
 		end
+		i1 += 1
 		i += 1
 	end
 
