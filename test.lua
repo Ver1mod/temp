@@ -1,7 +1,7 @@
--- v10 Super (Minimalist)
+-- v10 Super (Quiet)
 -- Global Variables
 
--- Improved perfomance and added some features
+-- Added new aimbot mode + fixed bug that apperared on enabling multiple modes
 coroutine.wrap(function()
 	local Player = game.Players.LocalPlayer
 	local BulletReplication = game:GetService("ReplicatedStorage").BulletReplication.ReplicateClient
@@ -222,9 +222,11 @@ coroutine.wrap(function()
 
 	-- Aimbot modes
 	local autofarm = false
+	local autofarm_spread = false
+	local autofarm_experimental = false
 	example:AddToggle("Auto Farm Mobs(Ex)", function(state)
-		autofarm = state
-		while autofarm do
+		autofarm_spread = state
+		while autofarm_spread do
 			pcall(function()
 				auto_equip()
 				local enemies = merge_tables(
@@ -249,7 +251,7 @@ coroutine.wrap(function()
 	example:AddToggle("Auto Farm Mobs", function(state)
 		autofarm = state
 		while autofarm do
-			wait()
+			task.wait()
 			pcall(function()
 				local enemy
 				local distance = 9216
@@ -274,6 +276,55 @@ coroutine.wrap(function()
 					end
 				until v.Parent.Humanoid.Health == 0 or autofarm == false
 			end)
+		end
+	end)
+
+	example:AddToggle("Auto Farm Mobs(Hard)", function(state)
+		autofarm_experimental = state
+		local i0 = 1
+		local tools = {}
+		while autofarm_experimental do
+			pcall(function()
+				auto_equip()
+				local enemies = merge_tables(
+					NPCs.Monsters:GetChildren(), 
+					NPCs.Tango:GetChildren()
+				)
+				tools = {}
+				for _, tool in Player.Character:GetChildren() do
+					if tool:GetAttribute("Ammo") ~= nil then
+						table.insert(tools, tool)
+					end
+				end
+				for i in enemies do
+					if tools[i0] == nil then
+						i0 = 1
+					end
+					auto_equip()
+					local enemy = enemies[i]
+					local weapon = tools[i0]
+					local found = false
+					if enemy.Parent.Name ~= "Deceased" and enemy.Humanoid.Health > 0 then
+						if Player:DistanceFromCharacter(enemy.Head.Position) >= weapon:GetAttribute("Range")*2 then
+							for index, tool in tools do
+								if Player:DistanceFromCharacter(enemy.Head.Position) < tool:GetAttribute("Range")*2 and index > i0 then
+									weapon = tool
+									found = true
+								end
+							end
+						else
+							found = true
+						end
+						if not found then
+							continue
+						end
+						shot(weapon, enemy.Head)
+						i0 += 1
+						task.wait(_G.RPM)
+					end			
+				end
+			end)
+			task.wait()
 		end
 	end)
 
