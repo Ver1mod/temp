@@ -252,7 +252,7 @@ example:AddToggle("Auto Farm Mobs(Hard)", function(state)
 		table.remove(enemies, target)
 	end)
 
-	while autofarm_experimental do
+	while autofarm_experimental and task.wait() do
 		pcall(function()
 			auto_equip()
 			tools = {}
@@ -262,7 +262,7 @@ example:AddToggle("Auto Farm Mobs(Hard)", function(state)
 				end
 			end
 			local i = 1
-			while #enemies - i >= 0 do
+			while #enemies - i >= 0 and task.wait() do
 				if tools[i0] == nil then
 					i0 = 1
 				end
@@ -291,7 +291,6 @@ example:AddToggle("Auto Farm Mobs(Hard)", function(state)
 				i += 1
 			end
 		end)
-		task.wait()
 	end
 	for v in connections do
 		v:Disconnect()
