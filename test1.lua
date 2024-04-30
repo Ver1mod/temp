@@ -137,6 +137,16 @@ example:AddBox("Range", function(object, focus)
 	end
 end)
 
+local Hardness = 5
+example:AddBox("Hardness", function(object, focus)
+	if focus then
+		Hardness = 5
+		pcall(function()
+			Hardness = tonumber(object.Text)
+		end)
+	end
+end)
+
 -- Backpack hack
 local backpack_hack = false
 example:AddToggle("Enable backpack bag", function(state)
@@ -279,7 +289,8 @@ example:AddToggle("Auto Farm Mobs(Hard)", function(state)
 	end)
 
 	local i = 1
-	while autofarm_experimental and task.wait() do
+	local i1 = 1
+	while autofarm_experimental do
 		auto_equip()
 		if enemies[1] == nil or tools[1] == nil then
 			continue
@@ -295,6 +306,9 @@ example:AddToggle("Auto Farm Mobs(Hard)", function(state)
 		if enemy.Parent.Name ~= "Deceased" and enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("Head") and enemy.Humanoid.Health > 0 then
 			shot(weapon, enemy.Head)
 			i0 += 1
+		end
+		if i1 >= Hardness then
+			task.wait()
 		end
 		i += 1
 	end
