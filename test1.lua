@@ -235,8 +235,34 @@ example:AddToggle("Auto Farm Mobs(Hard)", function(state)
 		NPCs.Monsters:GetChildren(), 
 		NPCs.Tango:GetChildren()
 	)
-
+	local tools = {}
+	for _, tool in Player.Character:GetChildren() do
+		if tool:GetAttribute("Ammo") ~= nil then
+			table.insert(tools, tool)
+		end
+	end
+	
 	local connections = {}
+	local function set_tools(character)
+		connections[5] = character.ChildAdded:Connect(function(tool)
+			if tool:GetAttribute("Ammo") ~= nil then
+				table.insert(tools, tool)
+			end
+		end)
+		connections[6] = character.ChildRemoved:Connect(function(tool)
+			if tool:GetAttribute("Ammo") ~= nil then
+				local target = table.find(tool)
+				table.remove(tools, target)
+			end
+		end)
+	end
+	set_tools(Player.Character)
+	Player.CharacterAdded:Connect(set_tools)
+	Player.CharacterRemoving:Connect(function()
+		connections[5]:Disconnect()
+		connections[6]:Disconnect()
+	end)
+	
 	connections[1] = NPCs.Monsters.ChildAdded:Connect(function(child)
 		table.insert(enemies, child)
 	end)
@@ -252,46 +278,42 @@ example:AddToggle("Auto Farm Mobs(Hard)", function(state)
 		table.remove(enemies, target)
 	end)
 
-	while autofarm_experimental and task.wait() do
-		pcall(function()
-			auto_equip()
-			tools = {}
-			for _, tool in Player.Character:GetChildren() do
-				if tool:GetAttribute("Ammo") ~= nil then
-					table.insert(tools, tool)
-				end
-			end
-			local i = 1
-			while #enemies - i >= 0 and task.wait() do
-				if tools[i0] == nil then
-					i0 = 1
-				end
-				auto_equip()
-				local enemy = enemies[i]
-				local weapon = tools[i0]
-				local found = false
-				if enemy.Parent.Name ~= "Deceased" and enemy.Humanoid.Health > 0 then
-					if Player:DistanceFromCharacter(enemy.Head.Position) >= weapon:GetAttribute("Range")*Range then
-						for index, tool in tools do
-							if Player:DistanceFromCharacter(enemy.Head.Position) < tool:GetAttribute("Range")*Range and index > i0 then
-								weapon = tool
-								found = true
-							end
-						end
-					else
+	local i = 1
+	while _G.autofarm_experimental and task.wait() do
+		auto_equip()
+		if enemies[1] == nil or tools[1] == nil then
+			continue
+		end
+		if enemies[i] == nil then
+			i = 1
+		end
+		if tools[i0] == nil then
+			i0 = 1
+		end
+		local enemy = enemies[i]
+		local weapon = tools[i0]
+		local found = false
+		if enemy.Parent.Name ~= "Deceased" and enemy.Humanoid.Health > 0 then
+			if Player:DistanceFromCharacter(enemy.Head.Position) >= weapon:GetAttribute("Range")*Range then
+				for index, tool in tools do
+					if Player:DistanceFromCharacter(enemy.Head.Position) < tool:GetAttribute("Range")*Range and index > i0 then
+						weapon = tool
 						found = true
 					end
-					if not found then
-						continue
-					end
-					shot(weapon, enemy.Head)
-					i0 += 1
-					task.wait(RPM)
 				end
-				i += 1
+			else
+				found = true
 			end
-		end)
+			if not found then
+				continue
+			end
+			shot(weapon, enemy.Head)
+			i0 += 1
+			task.wait(RPM)
+		end
+		i += 1
 	end
+	
 	for v in connections do
 		v:Disconnect()
 	end
