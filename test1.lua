@@ -293,10 +293,11 @@ example:AddToggle("Auto Farm Mobs(Hard)", function(state)
 		local enemy = enemies[i]
 		local weapon = tools[i0]
 		local found = false
-		if enemy.Parent.Name ~= "Deceased" and enemy.Humanoid.Health > 0 then
-			if Player:DistanceFromCharacter(enemy.Head.Position) >= weapon:GetAttribute("Range")*Range then
+		if enemy.Parent.Name ~= "Deceased" and enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("Head") and enemy.Humanoid.Health > 0 then
+			local distance = Player:DistanceFromCharacter(enemy.Head.Position)
+			if distance >= weapon:GetAttribute("Range")*Range then
 				for index, tool in tools do
-					if Player:DistanceFromCharacter(enemy.Head.Position) < tool:GetAttribute("Range")*Range and index > i0 then
+					if distance < tool:GetAttribute("Range")*Range and index > i0 then
 						weapon = tool
 						found = true
 					end
