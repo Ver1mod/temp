@@ -148,6 +148,17 @@ example:AddBox("Animation Speed", function(object, focus)
 		end)
 	end
 end)
+
+local Hardness = 5
+example:AddBox("Hardness", function(object, focus)
+	if focus then
+		Hardness = 5
+		pcall(function()
+			Hardness = tonumber(object.Text)
+		end)
+	end
+end)
+
 -- Backpack hack
 local backpack_hack = false
 example:AddToggle("Enable backpack bag", function(state)
@@ -303,14 +314,14 @@ example:AddToggle("Auto Farm Mobs(Hard)", function(state)
 		end)
 		connections[6] = character.ChildRemoved:Connect(function(tool)
 			if tool:GetAttribute("Ammo") ~= nil then
-				local target = table.find(tool)
+				local target = table.find(tools, tool)
 				table.remove(tools, target)
 			end
 		end)
 	end
 	set_tools(Player.Character)
-	Player.CharacterAdded:Connect(set_tools)
-	Player.CharacterRemoving:Connect(function()
+	connections[7] = Player.CharacterAdded:Connect(set_tools)
+	connections[8] = Player.CharacterRemoving:Connect(function()
 		connections[5]:Disconnect()
 		connections[6]:Disconnect()
 	end)
@@ -331,7 +342,8 @@ example:AddToggle("Auto Farm Mobs(Hard)", function(state)
 	end)
 
 	local i = 1
-	while _G.autofarm_experimental and task.wait() do
+	local i1 = 1
+	while autofarm_experimental do
 		auto_equip()
 		if enemies[1] == nil or tools[1] == nil then
 			continue
@@ -344,29 +356,19 @@ example:AddToggle("Auto Farm Mobs(Hard)", function(state)
 		end
 		local enemy = enemies[i]
 		local weapon = tools[i0]
-		local found = false
-		if enemy.Parent.Name ~= "Deceased" and enemy.Humanoid.Health > 0 then
-			if Player:DistanceFromCharacter(enemy.Head.Position) >= weapon:GetAttribute("Range")*Range then
-				for index, tool in tools do
-					if Player:DistanceFromCharacter(enemy.Head.Position) < tool:GetAttribute("Range")*Range and index > i0 then
-						weapon = tool
-						found = true
-					end
-				end
-			else
-				found = true
-			end
-			if not found then
-				continue
-			end
+		if enemy.Parent.Name ~= "Deceased" and enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("Head") and enemy.Humanoid.Health > 0 then
 			shot(weapon, enemy.Head)
 			i0 += 1
-			task.wait(RPM)
 		end
+		if i1 >= Hardness then
+			i1 = 1
+			task.wait()
+		end
+		i1 += 1
 		i += 1
 	end
 
-	for v in connections do
+	for _, v in connections do
 		v:Disconnect()
 	end
 end)
