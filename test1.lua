@@ -293,6 +293,7 @@ example:AddToggle("Auto Farm Mobs(Hard)", function(state)
 	while autofarm_experimental do
 		auto_equip()
 		if enemies[1] == nil or tools[1] == nil then
+			task.wait()
 			continue
 		end
 		if enemies[i] == nil then
