@@ -332,7 +332,13 @@ example:AddButton("Select target", function()
 			return raycastResult.Instance
 		end
 	end
-
+	
+	local function create_highlight(target)
+		highlight_instance = Instance.new("Highlight", target)
+		highlight_instance.FillTransparency = 0.6
+		highlight_instance.FillColor = Color3.fromRGB(8, 136, 255)
+	end
+	
 	local connection
 	connection = mouse.Button1Down:Connect(function()
 		local part = getPart()
@@ -343,14 +349,13 @@ example:AddButton("Select target", function()
 			end
 			if highlight_instance then
 				if highlight_instance.Parent ~= target then
-					highlight_instance.Parent = target
+					highlight_instance:Destroy()
+					create_highlight(target)
 				else
 					highlight_instance:Destroy()
 				end
 			else
-				highlight_instance = Instance.new("Highlight", target)
-				highlight_instance.FillTransparency = 0.6
-				highlight_instance.FillColor = Color3.fromRGB(8, 136, 255)
+				create_highlight(target)
 			end 
 		end
 		connection:Disconnect()
