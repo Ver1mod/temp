@@ -343,13 +343,14 @@ example:AddButton("Select target", function()
 			end
 			if highlight_instance then
 				if highlight_instance.Parent ~= target then
-					highlight_instance:Destroy()
-					highlight_instance = Instance.new("Highlight", target)
-					highlight_instance.FillTransparency = 0.6
-					highlight_instance.FillColor = Color3.fromRGB(8, 136, 255)
+					highlight_instance.Parent = target
 				else
 					highlight_instance:Destroy()
-				end	
+				end
+			else
+				highlight_instance = Instance.new("Highlight", target)
+				highlight_instance.FillTransparency = 0.6
+				highlight_instance.FillColor = Color3.fromRGB(8, 136, 255)
 			end 
 		end
 		connection:Disconnect()
