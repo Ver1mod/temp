@@ -83,46 +83,46 @@ example0:AddToggle("Mixture", function(state)
 end)
 
 -- Auto bring items
-example0:AddButton("Teleport Device", function(state)
+example0:AddButton("Teleport Device", function()
 	local ohString2 = "Teleport Device"
 	Use_Storage:FireServer("WITHDRAW", ohString2)
 	Player.Backpack:WaitForChild(ohString2).Parent = Player.Character
 	Player.Character:WaitForChild(ohString2).Use:FireServer(Vector3.new(0,0,0))
 end)
 
-example0:AddButton("Smoke Grenade", function(state)
+example0:AddButton("Smoke Grenade", function()
 	local ohString2 = "Smoke Grenade"
 	Use_Storage:FireServer("WITHDRAW", ohString2)
 end)
 
-example0:AddButton("Scan Grenade", function(state)
+example0:AddButton("Scan Grenade", function()
 	local ohString2 = "Scan Grenade"
 	Use_Storage:FireServer("WITHDRAW", ohString2)
 end)
 
-example0:AddButton("Aura Grenade", function(state)
+example0:AddButton("Aura Grenade", function()
 	local ohString2 = "Aura Grenade"
 	Use_Storage:FireServer("WITHDRAW", ohString2)
 end)
 
-example0:AddButton("Deposit", function(state)
+example0:AddButton("Deposit", function()
 	local tool = Player.Character:FindFirstChildOfClass("Tool")
 	if tool:GetAttribute("FromStorage") == true then
 		Use_Storage:FireServer("DEPOSIT", tool.Name)
 	end
 end)
 
-example0:AddButton("Bulk scrap", function(state)
+example0:AddButton("Bulk scrap", function()
 	Player.PlayerGui.BulkScrap.Enabled = true
 end)
 
 -- Aimbot settings
 local RPM = 0
-example:AddBox("RPM", function(object, focus)
+example:AddBox("Delay", function(object, focus)
 	if focus then
 		RPM = 0
 		pcall(function()
-			RPM = 1/tonumber(object.Text)*60
+			RPM = tonumber(object.Text)
 		end)
 	end
 end)
@@ -172,7 +172,7 @@ local function shot(weapon, enemy)
 	if weapon:GetAttribute("Ammo") ~= nil then
 		if Player:DistanceFromCharacter(enemy.Position) < weapon:GetAttribute("Range")*Range then
 			weapon.Main:FireServer("MUZZLE", weapon.Handle.Barrel)
-			weapon.Main:FireServer("DAMAGE", {[1]=enemy,[2] = enemy.Position,[3]=100})
+			weapon.Main:FireServer("DAMAGE", {[1]=enemy,[2] = enemy.Position,[3]=100, [4] = true})
 			weapon.Main:FireServer("AMMO")
 		end
 	end
@@ -182,6 +182,7 @@ end
 local autofarm = false
 local autofarm_spread = false
 local autofarm_experimental = false
+local highlight_instance
 example:AddToggle("Auto Farm Mobs(Ex)", function(state)
 	autofarm_spread = state
 	while autofarm_spread do
@@ -211,28 +212,14 @@ example:AddToggle("Auto Farm Mobs", function(state)
 	while autofarm do
 		task.wait()
 		pcall(function()
-			local enemy
-			local distance = 9216
-
-			local enemies = merge_tables(
-				NPCs.Monsters:GetChildren(), 
-				NPCs.Tango:GetChildren()
-			)
-
-			for i,v in enemies do
-				if Player:DistanceFromCharacter(v.Head.Position) < distance then
-					enemy = v
-					distance = Player:DistanceFromCharacter(v.Head.Position)
-				end
-			end
-
-			local v = enemy.Head
-			repeat task.wait()
+			local enemy = highlight_instance.Parent
+			while enemy.Humanoid.Health > 0 and autofarm do
 				auto_equip()
 				for _, tool in Player.Character:GetChildren() do
-					shot(tool, v)
+					shot(tool, enemy.Head)
 				end
-			until v.Parent.Humanoid.Health == 0 or autofarm == false
+				task.wait(RPM)
+			end
 		end)
 	end
 end)
@@ -319,4 +306,52 @@ example:AddToggle("Auto Farm Mobs(Hard)", function(state)
 	for _, v in connections do
 		v:Disconnect()
 	end
+end)
+
+example:AddButton("Select target", function()
+	-- Player
+	local mouse = Player:GetMouse()
+
+	-- Detect part
+	local UserInputService = game:GetService("UserInputService")
+	local MAX_MOUSE_DISTANCE = 2400
+
+	local function getPart()
+		local mouseLocation = UserInputService:GetMouseLocation()
+
+		-- Create a ray from the 2D mouseLocation
+		local screenToWorldRay = workspace.CurrentCamera:ViewportPointToRay(mouseLocation.X, mouseLocation.Y)
+
+		-- The unit direction vector of the ray multiplied by a maximum distance
+		local directionVector = screenToWorldRay.Direction * MAX_MOUSE_DISTANCE
+
+		-- Raycast from the ray's origin towards its direction
+		local raycastResult = workspace:Raycast(screenToWorldRay.Origin, directionVector)
+
+		if raycastResult then
+			return raycastResult.Instance
+		end
+	end
+
+	local connection
+	connection = mouse.Button1Down:Connect(function()
+		local part = getPart()
+		local target = part
+		if part and part:IsDescendantOf(NPCs) then
+			while target.Parent.Parent ~= NPCs do
+				target = target.Parent
+			end
+			if highlight_instance then
+				if highlight_instance.Parent ~= target then
+					highlight_instance:Destroy()
+					highlight_instance = Instance.new("Highlight", target)
+					highlight_instance.FillTransparency = 0.6
+					highlight_instance.FillColor = Color3.fromRGB(8, 136, 255)
+				else
+					highlight_instance:Destroy()
+				end	
+			end 
+		end
+		connection:Disconnect()
+	end)
 end)
