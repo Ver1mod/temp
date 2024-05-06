@@ -306,12 +306,12 @@ example:AddToggle("Auto Farm Mobs", function(state)
 end)
 
 
-function test.highlight_instance:Create(target)
-	self = Instance.new("Highlight")
-	self.Name = "TestHighlight"
-	self.Parent = target
-	self.FillTransparency = 0.6
-	self.FillColor = Color3.fromRGB(8, 136, 255)
+function test.create_highlight(target)
+	test.highlight_instance = Instance.new("Highlight")
+	test.highlight_instance.Name = "TestHighlight"
+	test.highlight_instance.Parent = target
+	test.highlight_instance.FillTransparency = 0.6
+	test.highlight_instance.FillColor = Color3.fromRGB(8, 136, 255)
 end
 
 function test.getPart()
@@ -349,13 +349,13 @@ function test.select_target()
 		if test.highlight_instance ~= nil then
 			if test.highlight_instance.Parent ~= test.part then
 				test.highlight_instance:Destroy()
-				test.highlight_instance:Create(test.part)
+				test.create_highlight(test.part)
 			else
 				test.highlight_instance:Destroy()
 				test.part = nil
 			end
 		else
-			test.highlight_instance:Create(test.part)
+			test.create_highlight(test.part)
 		end 
 	end
 end
@@ -370,3 +370,19 @@ function test.BindAction()
 	end
 	ContextActionService:BindAction("SelectedPart", handleAction, false, test.KeyCode)
 end
+
+
+
+local test = {}
+test.__index = test
+local ContextActionService = game:GetService("ContextActionService")
+test.KeyCode = Enum.KeyCode["B"]
+
+local function handleAction(actionName, inputState, inputObject)
+	if actionName == "SelectedPart" then
+		if inputState == Enum.UserInputState.Begin then
+			print("FUCK")
+		end
+	end
+end
+ContextActionService:BindAction("SelectedPart", handleAction, false, test.KeyCode)
