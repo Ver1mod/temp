@@ -5,6 +5,7 @@ local Player = game.Players.LocalPlayer
 local BulletReplication = game:GetService("ReplicatedStorage").BulletReplication.ReplicateClient
 local Use_Storage = game:GetService("ReplicatedStorage").Remotes.UseStorage
 local NPCs = game.Workspace.NPCs
+local UserInputService = game:GetService("UserInputService")
 
 local function merge_tables(arg, value0)
 	local value = arg
@@ -180,49 +181,8 @@ end
 
 -- Aimbot modes
 local autofarm = false
-local autofarm_spread = false
 local autofarm_experimental = false
-local highlight_instance
-example:AddToggle("Auto Farm Mobs(Ex)", function(state)
-	autofarm_spread = state
-	while autofarm_spread do
-		pcall(function()
-			auto_equip()
-			local enemies = merge_tables(
-				NPCs.Monsters:GetChildren(), 
-				NPCs.Tango:GetChildren()
-			)
-			for _, enemy in enemies do
-				local v = enemy.Head
-				auto_equip()
-				if v.Parent.Parent.Name ~= "Deceased" and v.Parent.Humanoid.Health > 0 then
-					for _, tool in Player.Character:GetChildren() do
-						shot(tool, v)
-					end
-					task.wait(RPM)
-				end
-			end
-		end)
-		task.wait()
-	end
-end)
-
-example:AddToggle("Auto Farm Mobs", function(state)
-	autofarm = state
-	while autofarm do
-		task.wait()
-		pcall(function()
-			local enemy = highlight_instance.Parent
-			while enemy.Humanoid.Health > 0 and autofarm do
-				auto_equip()
-				for _, tool in Player.Character:GetChildren() do
-					shot(tool, enemy.Head)
-				end
-				task.wait(RPM)
-			end
-		end)
-	end
-end)
+local selected_part
 
 example:AddToggle("Auto Farm Mobs(Hard)", function(state)
 	autofarm_experimental = state
@@ -308,7 +268,55 @@ example:AddToggle("Auto Farm Mobs(Hard)", function(state)
 	end
 end)
 
-example:AddButton("Select target", function()
+local test = {}
+test.__index = test
+
+example:AddToggle("Auto Farm Mobs", function(state)
+	autofarm = state
+	while autofarm do
+		task.wait()
+		pcall(function()
+			local enemy = test.highlight_instance.Parent
+			local target
+			if enemy:FindFirstChild("Head") then
+				target = enemy.Head
+			else
+				target = test.part
+			end
+			while enemy.Humanoid.Health > 0 and autofarm do
+				auto_equip()
+				for _, tool in Player.Character:GetChildren() do
+					shot(tool, target)
+				end
+				task.wait(RPM)
+			end
+		end)
+	end
+end)
+
+
+function test.BindAction()
+	local ContextActionService = game:GetService("ContextActionService")
+	local function handleAction(actionName, inputState, inputObject)
+		if actionName == "SelectedPart" then
+			if inputState == Enum.UserInputState.Begin then
+				test.select_target()
+			end
+		end
+	end
+	-- When the player sits in the vehicle:
+	ContextActionService:BindAction("SelectedPart", handleAction, false, Enum.KeyCode.P)
+end
+
+function test.highlight_instance:Create(target)
+	self = Instance.new("Highlight")
+	self.Name = "TestHighlight"
+	self.Parent = target
+	self.FillTransparency = 0.6
+	self.FillColor = Color3.fromRGB(8, 136, 255)
+end
+
+function test.getPart()
 	-- Player
 	local mouse = Player:GetMouse()
 
@@ -316,50 +324,40 @@ example:AddButton("Select target", function()
 	local UserInputService = game:GetService("UserInputService")
 	local MAX_MOUSE_DISTANCE = 2400
 
-	local function getPart()
-		local mouseLocation = UserInputService:GetMouseLocation()
+	local mouseLocation = UserInputService:GetMouseLocation()
 
-		-- Create a ray from the 2D mouseLocation
-		local screenToWorldRay = workspace.CurrentCamera:ViewportPointToRay(mouseLocation.X, mouseLocation.Y)
+	-- Create a ray from the 2D mouseLocation
+	local screenToWorldRay = workspace.CurrentCamera:ViewportPointToRay(mouseLocation.X, mouseLocation.Y)
 
-		-- The unit direction vector of the ray multiplied by a maximum distance
-		local directionVector = screenToWorldRay.Direction * MAX_MOUSE_DISTANCE
+	-- The unit direction vector of the ray multiplied by a maximum distance
+	local directionVector = screenToWorldRay.Direction * MAX_MOUSE_DISTANCE
 
-		-- Raycast from the ray's origin towards its direction
-		local raycastResult = workspace:Raycast(screenToWorldRay.Origin, directionVector)
+	-- Raycast from the ray's origin towards its direction
+	local raycastResult = workspace:Raycast(screenToWorldRay.Origin, directionVector)
 
-		if raycastResult then
-			return raycastResult.Instance
-		end
+	if raycastResult then
+		return raycastResult.Instance
 	end
+end
 
-	local function create_highlight(target)
-		highlight_instance = Instance.new("Highlight")
-		highlight_instance.Name = "TestHighlight"
-		highlight_instance.Parent = target
-		highlight_instance.FillTransparency = 0.6
-		highlight_instance.FillColor = Color3.fromRGB(8, 136, 255)
-	end
-
-	local connection
-	connection = mouse.Button1Down:Connect(function()
-		local part = getPart()
-		local target = part
-		if part and part:IsDescendantOf(NPCs) then
-			while target.Parent.Parent ~= NPCs do
-				target = target.Parent
+function test.select_target()
+	test.part = test.getPart()
+	if test.part and test.part:IsDescendantOf(NPCs) then
+		if test.part:IsDescendantOf(NPCs) then
+			while test.part.Parent.Parent ~= NPCs do
+				test.part = test.part.Parent
 			end
-			if highlight_instance ~= nil then
-				if highlight_instance.Parent ~= target then
-					highlight_instance:Destroy()
-					create_highlight(target)
-				else
-					highlight_instance:Destroy()
-				end
-			else
-				create_highlight(target)
-			end 
 		end
-		connection:Disconnect()
-	end)
-end)
+		if test.highlight_instance ~= nil then
+			if test.highlight_instance.Parent ~= test.part then
+				test.highlight_instance:Destroy()
+				test.highlight_instance:Create(test.part)
+			else
+				test.highlight_instance:Destroy()
+				test.part = nil
+			end
+		else
+			test.highlight_instance:Create(test.part)
+		end 
+	end
+end
