@@ -162,14 +162,14 @@ end)
 -- Aimbot modules
 local function auto_equip()
 	for _, v in Player.Backpack:GetChildren() do
-		if v:GetAttribute("Ammo") ~= nil then
+		if v:GetAttribute("Ammo") then
 			v.Parent = Player.Character
 		end
 	end
 end
 
 local function shot(weapon, enemy)
-	if weapon:GetAttribute("Ammo") ~= nil then
+	if weapon:GetAttribute("Ammo") then
 		if Player:DistanceFromCharacter(enemy.Position) < weapon:GetAttribute("Range")*Range then
 			weapon.Main:FireServer("MUZZLE", weapon.Handle.Barrel)
 			weapon.Main:FireServer("DAMAGE", {[1]=enemy,[2] = enemy.Position,[3]=100, [4] = true})
@@ -193,7 +193,7 @@ example:AddToggle("Auto Farm Mobs(Hard)", function(state)
 	)
 	local tools = {}
 	for _, tool in Player.Character:GetChildren() do
-		if tool:GetAttribute("Ammo") ~= nil then
+		if tool:GetAttribute("Ammo") then
 			table.insert(tools, tool)
 		end
 	end
@@ -201,12 +201,12 @@ example:AddToggle("Auto Farm Mobs(Hard)", function(state)
 	local connections = {}
 	local function set_tools(character)
 		connections[5] = character.ChildAdded:Connect(function(tool)
-			if tool:GetAttribute("Ammo") ~= nil then
+			if tool:GetAttribute("Ammo") then
 				table.insert(tools, tool)
 			end
 		end)
 		connections[6] = character.ChildRemoved:Connect(function(tool)
-			if tool:GetAttribute("Ammo") ~= nil then
+			if tool:GetAttribute("Ammo") then
 				local target = table.find(tools, tool)
 				table.remove(tools, target)
 			end
@@ -288,16 +288,10 @@ example:AddToggle("Auto Farm Mobs", function(state)
 		task.wait()
 		pcall(function()
 			local enemy = test.highlight_instance.Parent
-			local target
-			if enemy:FindFirstChild("Head") then
-				target = enemy.Head
-			else
-				target = test.part
-			end
 			while enemy.Humanoid.Health > 0 and autofarm do
 				auto_equip()
 				for _, tool in Player.Character:GetChildren() do
-					shot(tool, target)
+					shot(tool, enemy.Head)
 				end
 				task.wait(RPM)
 			end
@@ -306,12 +300,12 @@ example:AddToggle("Auto Farm Mobs", function(state)
 end)
 
 
-function test.highlight_instance:Create(target)
-	self = Instance.new("Highlight")
-	self.Name = "TestHighlight"
-	self.Parent = target
-	self.FillTransparency = 0.6
-	self.FillColor = Color3.fromRGB(8, 136, 255)
+function test.create_highlight(target)
+	test.highlight_instance = Instance.new("Highlight")
+	test.highlight_instance.Name = "TestHighlight"
+	test.highlight_instance.Parent = target
+	test.highlight_instance.FillTransparency = 0.6
+	test.highlight_instance.FillColor = Color3.fromRGB(8, 136, 255)
 end
 
 function test.getPart()
@@ -341,21 +335,19 @@ end
 function test.select_target()
 	test.part = test.getPart()
 	if test.part and test.part:IsDescendantOf(NPCs) then
-		if test.part:IsDescendantOf(NPCs) then
-			while test.part.Parent.Parent ~= NPCs do
-				test.part = test.part.Parent
-			end
+		while test.part.Parent.Parent ~= NPCs do
+			test.part = test.part.Parent
 		end
-		if test.highlight_instance ~= nil then
+		if test.highlight_instance then
 			if test.highlight_instance.Parent ~= test.part then
 				test.highlight_instance:Destroy()
-				test.highlight_instance:Create(test.part)
+				test.create_highlight(test.part)
 			else
 				test.highlight_instance:Destroy()
 				test.part = nil
 			end
 		else
-			test.highlight_instance:Create(test.part)
+			test.create_highlight(test.part)
 		end 
 	end
 end
