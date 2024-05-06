@@ -306,17 +306,6 @@ example:AddToggle("Auto Farm Mobs", function(state)
 end)
 
 
-function test.BindAction()
-	local function handleAction(actionName, inputState, inputObject)
-		if actionName == "SelectedPart" then
-			if inputState == Enum.UserInputState.Begin then
-				test.select_target()
-			end
-		end
-	end
-	ContextActionService:BindAction("SelectedPart", handleAction, false, test.KeyCode)
-end
-
 function test.highlight_instance:Create(target)
 	self = Instance.new("Highlight")
 	self.Name = "TestHighlight"
@@ -369,4 +358,15 @@ function test.select_target()
 			test.highlight_instance:Create(test.part)
 		end 
 	end
+end
+
+function test.BindAction()
+	local function handleAction(actionName, inputState, inputObject)
+		if actionName == "SelectedPart" then
+			if inputState == Enum.UserInputState.Begin then
+				test.select_target()
+			end
+		end
+	end
+	ContextActionService:BindAction("SelectedPart", handleAction, false, test.KeyCode)
 end
