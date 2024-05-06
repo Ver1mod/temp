@@ -2,10 +2,9 @@
 -- Global Variables
 
 local Player = game.Players.LocalPlayer
-local BulletReplication = game:GetService("ReplicatedStorage").BulletReplication.ReplicateClient
 local Use_Storage = game:GetService("ReplicatedStorage").Remotes.UseStorage
 local NPCs = game.Workspace.NPCs
-local UserInputService = game:GetService("UserInputService")
+local ContextActionService = game:GetService("ContextActionService")
 
 local function merge_tables(arg, value0)
 	local value = arg
@@ -271,6 +270,18 @@ end)
 local test = {}
 test.__index = test
 
+test.KeyCode = Enum.KeyCode.B
+example:AddBox("Key", function(object, focus)
+	if focus then
+		test.KeyCode = Enum.KeyCode.B
+		pcall(function()
+			test.KeyCode = Enum.KeyCode[object.Text]
+		end)
+		ContextActionService:UnbindAction("SelectedPart")
+		test.BindAction()
+	end
+end)
+
 example:AddToggle("Auto Farm Mobs", function(state)
 	autofarm = state
 	while autofarm do
@@ -296,7 +307,6 @@ end)
 
 
 function test.BindAction()
-	local ContextActionService = game:GetService("ContextActionService")
 	local function handleAction(actionName, inputState, inputObject)
 		if actionName == "SelectedPart" then
 			if inputState == Enum.UserInputState.Begin then
@@ -304,8 +314,7 @@ function test.BindAction()
 			end
 		end
 	end
-	-- When the player sits in the vehicle:
-	ContextActionService:BindAction("SelectedPart", handleAction, false, Enum.KeyCode.P)
+	ContextActionService:BindAction("SelectedPart", handleAction, false, test.KeyCode)
 end
 
 function test.highlight_instance:Create(target)
